@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semáforo de Balance — Bancos Argentinos 1T26</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Syne+Mono&display=swap');
+
+  :root {
+    --bg: #f8f5f0;
+    --surface: #ffffff;
+    --ink: #1a1714;
+    --muted: #6b6560;
+    --border: #e2ddd8;
+    --green-dark: #166534;
+    --green-mid:  #15803d;
+    --green-light:#dcfce7;
+    --yellow-dark:#854d0e;
+    --yellow-mid: #ca8a04;
+    --yellow-light:#fef9c3;
+    --red-dark:   #991b1b;
+    --red-mid:    #dc2626;
+    --red-light:  #fee2e2;
+    --neutral-bg: #f1ede8;
+    --bbar: #2563eb;
+    --ggal: #059669;
+    --bma:  #d97706;
+    --supv: #7c3aed;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Syne', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 44px 48px;
+    max-width: 860px;
+    width: 100%;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    font-weight: 400;
+  }
+
+  /* TABLE */
+  .table-wrapper { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  /* Header row with bank names */
+  .bank-header th {
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .th-metric {
+    text-align: left !important;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-left: 0 !important;
+  }
+
+  .bank-pill {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 2px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .pill-bma  { background: #fef3c7; color: var(--bma); }
+  .pill-bbar { background: #dbeafe; color: var(--bbar); }
+  .pill-ggal { background: #d1fae5; color: var(--ggal); }
+  .pill-supv { background: #ede9fe; color: var(--supv); }
+
+  /* Data rows */
+  .data-row td {
+    padding: 11px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    transition: filter 0.15s;
+  }
+
+  .data-row:last-child td { border-bottom: none; }
+
+  .data-row td:first-child {
+    text-align: left;
+    padding-left: 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .td-label-sub {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Color classes */
+  .g3 { background: var(--green-light); color: var(--green-dark); border-radius: 4px; }
+  .g2 { background: #bbf7d0; color: var(--green-dark); border-radius: 4px; }
+  .g1 { background: #d1fae5; color: var(--green-mid); border-radius: 4px; }
+  .y1 { background: var(--yellow-light); color: var(--yellow-dark); border-radius: 4px; }
+  .r1 { background: var(--red-light); color: var(--red-dark); border-radius: 4px; }
+  .n0 { background: var(--neutral-bg); color: var(--muted); border-radius: 4px; }
+
+  .crown::before { content: '★ '; font-size: 11px; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .legend-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .footer {
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.6;
+    opacity: 0.75;
+  }
+
+  /* Divider row */
+  .divider td {
+    padding: 0;
+    height: 6px;
+    border: none;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">Comparativo sectorial · 1T26 · Datos oficiales</div>
+  <h1>Semáforo de indicadores de balance</h1>
+  <p class="subtitle">Bancos argentinos listados en Merval — Resultados primer trimestre 2026</p>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr class="bank-header">
+          <th class="th-metric">Métrica</th>
+          <th><span class="bank-pill pill-bma">BMA</span></th>
+          <th><span class="bank-pill pill-bbar">BBAR</span></th>
+          <th><span class="bank-pill pill-ggal">GGAL</span></th>
+          <th><span class="bank-pill pill-supv">SUPV</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="divider"><td colspan="5"></td></tr>
+
+        <tr class="data-row">
+          <td>
+            ROE (anualizado)
+            <span class="td-label-sub">Retorno s/ patrimonio</span>
+          </td>
+          <td class="g3 crown">10,0%</td>
+          <td class="g2">8,3%</td>
+          <td class="y1">3,2%</td>
+          <td class="y1">2,5%*</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            NIM
+            <span class="td-label-sub">Margen financiero neto</span>
+          </td>
+          <td class="g3 crown">25,3%</td>
+          <td class="g2">18,6%</td>
+          <td class="g1">17,8%</td>
+          <td class="g1">17,7%</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            Mora (NPL)
+            <span class="td-label-sub">Cartera irregular / total</span>
+          </td>
+          <td class="g2 crown">5,40%</td>
+          <td class="g1">5,60%</td>
+          <td class="r1">9,6%†</td>
+          <td class="g1">5,60%</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            Cobertura
+            <span class="td-label-sub">Previsiones / cartera irregular</span>
+          </td>
+          <td class="g3 crown">109,8%</td>
+          <td class="r1">88,4%‡</td>
+          <td class="g2">93,4%</td>
+          <td class="g3">103,9%</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            Eficiencia
+            <span class="td-label-sub">Gastos / ingresos (menor = mejor)</span>
+          </td>
+          <td class="g3 crown">32,0%</td>
+          <td class="y1">51,4%</td>
+          <td class="g2">39,9%</td>
+          <td class="r1">55,8%*</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            Costo de riesgo
+            <span class="td-label-sub">Previsiones / cartera</span>
+          </td>
+          <td class="n0">n/d</td>
+          <td class="g2 crown">6,14%</td>
+          <td class="y1">9,5%</td>
+          <td class="g1">6,4%</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            ROA (anualizado)
+            <span class="td-label-sub">Retorno s/ activos</span>
+          </td>
+          <td class="g3 crown">2,4%</td>
+          <td class="g2">1,2%</td>
+          <td class="y1">0,6%</td>
+          <td class="r1">neg.</td>
+        </tr>
+
+        <tr class="data-row">
+          <td>
+            Capital regulatorio (Tier 1)
+            <span class="td-label-sub">Solvencia patrimonial</span>
+          </td>
+          <td class="g3 crown">~21%</td>
+          <td class="g3">18,8%</td>
+          <td class="g3">25,5%</td>
+          <td class="g2">15,2%</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">Semáforo:</span>
+    <div class="legend-item"><div class="swatch g3"></div><span>Líder del sector</span></div>
+    <div class="legend-item"><div class="swatch g2"></div><span>Por encima del promedio</span></div>
+    <div class="legend-item"><div class="swatch g1"></div><span>En línea con el sector</span></div>
+    <div class="legend-item"><div class="swatch y1"></div><span>Por debajo del promedio</span></div>
+    <div class="legend-item"><div class="swatch r1"></div><span>Punto de atención</span></div>
+    <div class="legend-item"><div class="swatch n0"></div><span>Sin dato disponible</span></div>
+    <div class="legend-item"><span style="font-size:11px">★ Mejor del grupo en esa métrica</span></div>
+  </div>
+
+  <p class="footer">
+    * Ajustado por plan extraordinario de reducción de dotación (9% de la planta). Sin ajuste: ROE –6,2%; eficiencia no comparable.<br>
+    † Consolidado; Banco Galicia standalone NPL: 7,7%. Naranja X NPL: 16,9%, que eleva la cifra consolidada.<br>
+    ‡ BBAR cobertura: 88,4%, por debajo del umbral técnico del 90% que sigue el mercado.<br>
+    Fuentes: Comunicados de prensa y filings 6-K · BMA (27/05/26) · BBAR (27/05/26) · GGAL (14/05/26) · SUPV (06/05/26) · NYSE / BYMA.
+  </p>
+</div>
+</body>
+</html>
