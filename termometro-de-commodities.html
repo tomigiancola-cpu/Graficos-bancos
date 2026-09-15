@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termómetro de Commodities</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Archivo+Expanded:wght@700&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --surface-1:      #ffffff;
+    --page-plane:     #f4f3ef;
+    --text-primary:   #14130f;
+    --text-secondary: #55534b;
+    --text-muted:     #918f84;
+    --grid:           #e7e5dc;
+    --baseline:       #cfccc0;
+    --border:         rgba(20,19,15,0.09);
+    --chip-bg:        #f1efe7;
+    --chip-bg-hover:  #e7e4d8;
+    --shadow:         0 1px 2px rgba(20,19,15,.04), 0 12px 32px -16px rgba(20,19,15,.18);
+    --up:             #0ca30c;
+    --down:           #d03b3b;
+
+    --series-1: #2a78d6; /* índice — blue */
+    --series-2: #eb6834; /* petróleo — orange */
+    --series-3: #1baf7a; /* trigo — aqua/verde */
+    --series-4: #c98500; /* oro — ámbar */
+    --series-5: #e87ba4; /* soja — magenta */
+    --series-6: #008300; /* maíz — verde */
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --surface-1:      #1c1c19;
+      --page-plane:     #101010;
+      --text-primary:   #f7f6f2;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #8d8b80;
+      --grid:           #2f2f2b;
+      --baseline:       #3d3d38;
+      --border:         rgba(255,255,255,0.10);
+      --chip-bg:        #262622;
+      --chip-bg-hover:  #303029;
+      --shadow:         0 1px 2px rgba(0,0,0,.3), 0 20px 40px -20px rgba(0,0,0,.6);
+      --up:             #35c95d;
+      --down:           #e66767;
+
+      --series-1: #4c93ea;
+      --series-2: #e9773f;
+      --series-3: #2bbd88;
+      --series-4: #d99a1f;
+      --series-5: #dd6a97;
+      --series-6: #2fa42f;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --surface-1:      #1c1c19;
+    --page-plane:     #101010;
+    --text-primary:   #f7f6f2;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #8d8b80;
+    --grid:           #2f2f2b;
+    --baseline:       #3d3d38;
+    --border:         rgba(255,255,255,0.10);
+    --chip-bg:        #262622;
+    --chip-bg-hover:  #303029;
+    --shadow:         0 1px 2px rgba(0,0,0,.3), 0 20px 40px -20px rgba(0,0,0,.6);
+    --up:             #35c95d;
+    --down:           #e66767;
+
+    --series-1: #4c93ea;
+    --series-2: #e9773f;
+    --series-3: #2bbd88;
+    --series-4: #d99a1f;
+    --series-5: #dd6a97;
+    --series-6: #2fa42f;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  body{
+    background: var(--page-plane);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap{
+    max-width: 720px;
+    margin: 0 auto;
+    padding-inline: 18px;
+    padding-block: 26px 30px;
+  }
+  .eyebrow{
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--series-2);
+    margin: 0 0 8px;
+  }
+  h1{
+    font-family: "Archivo Expanded", "Archivo", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.05rem);
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+
+  .card{
+    position: relative;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 22px 22px 14px;
+    overflow: hidden;
+  }
+  .accent-bar{
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--dot, var(--series-1));
+    transition: background-color .25s ease;
+  }
+
+  .controls{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 20px;
+  }
+  .chip{
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--chip-bg);
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color .15s ease, color .15s ease, transform .15s ease;
+  }
+  .chip:hover{ background: var(--chip-bg-hover); }
+  .chip:active{ transform: scale(0.97); }
+  .chip:focus-visible{ outline: 2px solid var(--dot); outline-offset: 2px; }
+  .chip .dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--dot); flex: none; }
+  .chip[aria-pressed="true"]{ background: var(--dot); color: #fff; border-color: transparent; }
+  .chip[aria-pressed="true"] .dot{ background: #fff; }
+
+  .chart-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .chart-head .titles{ display:flex; flex-direction:column; gap:1px; }
+  .chart-head h2{
+    font-family: "Archivo", system-ui, sans-serif;
+    font-size: 1.12rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .chart-head .unit{ font-size: 0.78rem; color: var(--text-muted); }
+  .delta-pill{
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 5px 11px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .delta-pill.up{ color: var(--up); background: color-mix(in srgb, var(--up) 14%, transparent); }
+  .delta-pill.down{ color: var(--down); background: color-mix(in srgb, var(--down) 14%, transparent); }
+  .delta-pill .cap{ font-weight: 500; color: var(--text-muted); font-size: .72rem; }
+
+  svg{ display:block; width:100%; height:auto; overflow: visible; }
+  .gridline{ stroke: var(--grid); stroke-width: 1; }
+  .axis-label{ fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .x-label{ fill: var(--text-secondary); font-size: 11.5px; font-weight: 600; }
+  .line-path{ fill:none; stroke-width: 3; stroke-linecap:round; stroke-linejoin:round; }
+  .pt{ stroke: var(--surface-1); stroke-width: 2.5; }
+  .pt-hit{ fill: transparent; cursor: pointer; }
+  .end-label{ font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; font-family: "Archivo", system-ui, sans-serif; }
+  .crosshair{ stroke: var(--baseline); stroke-width:1; stroke-dasharray: 3 3; opacity:0; pointer-events:none; }
+  .chart-anim{ opacity: 0; transform: translateY(4px); transition: opacity .28s ease, transform .28s ease; }
+  .chart-anim.in{ opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce){ .chart-anim{ transition: none; opacity:1; transform:none; } }
+
+  .tooltip{
+    position: absolute;
+    pointer-events: none;
+    background: var(--text-primary);
+    color: var(--page-plane);
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-size: 0.8rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,.22);
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity .1s ease;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .tooltip .t-year{ opacity: .65; font-size: .7rem; margin-bottom: 2px; }
+  .tooltip .t-val{ font-weight: 800; font-variant-numeric: tabular-nums; }
+  .tooltip .t-delta{ margin-left: 6px; font-size: .76rem; font-weight: 700; }
+
+  .chart-wrap{ position: relative; padding-top: 6px; }
+
+  @media (max-width: 480px){
+    .card{ padding: 18px 16px 12px; }
+    .chart-head{ align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="eyebrow">Mercados &middot; Commodities</p>
+  <h1>Termómetro de Commodities</h1>
+
+  <div class="card">
+    <div class="accent-bar" id="accentBar"></div>
+    <div class="controls" role="group" aria-label="Seleccionar commodity" id="controls"></div>
+
+    <div class="chart-head">
+      <div class="titles">
+        <h2 id="chartTitle">Índice de commodities</h2>
+        <span class="unit" id="chartUnit">base 100 = 2021</span>
+      </div>
+      <span class="delta-pill" id="deltaPill"><span class="cap">21&rarr;26</span></span>
+    </div>
+
+    <div class="chart-wrap">
+      <svg id="chart" viewBox="0 0 680 300" role="img" aria-labelledby="chartTitle"></svg>
+      <div class="tooltip" id="tooltip">
+        <div class="t-year" id="ttYear"></div>
+        <div><span class="t-val" id="ttVal"></span><span class="t-delta" id="ttDelta"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const YEARS = ['2021','2022','2023','2024','2025','2026*'];
+
+  const SERIES = {
+    indice: {
+      label: 'Índice de commodities', unit: 'puntos, base 100 = 2021', slot: 1,
+      values: [100.0, 125.4, 110.8, 98.3, 105.7, 135.9],
+      fmt: v => v.toFixed(1)
+    },
+    petroleo: {
+      label: 'Petróleo (Brent)', unit: 'USD por barril', slot: 2,
+      values: [70.86, 100.93, 82.49, 80.52, 69.14, 96.02],
+      fmt: v => '$' + v.toFixed(1)
+    },
+    trigo: {
+      label: 'Trigo', unit: 'USD por bushel', slot: 3,
+      values: [6.70, 9.34, 7.88, 5.71, 5.41, 7.82],
+      fmt: v => '$' + v.toFixed(2)
+    },
+    oro: {
+      label: 'Oro', unit: 'USD por onza', slot: 4,
+      values: [1799, 1800, 1941, 2386, 3432, 4365],
+      fmt: v => '$' + Math.round(v).toLocaleString('es-AR')
+    },
+    soja: {
+      label: 'Soja', unit: 'USD por bushel', slot: 5,
+      values: [12.35, 14.20, 12.40, 10.00, 10.20, 13.17],
+      fmt: v => '$' + v.toFixed(2)
+    },
+    maiz: {
+      label: 'Maíz', unit: 'USD por bushel', slot: 6,
+      values: [5.45, 7.08, 6.09, 4.31, 4.18, 4.26],
+      fmt: v => '$' + v.toFixed(2)
+    }
+  };
+
+  const root = document.documentElement;
+  function seriesColor(slot){
+    return getComputedStyle(root).getPropertyValue('--series-' + slot).trim();
+  }
+
+  let active = 'indice';
+
+  const controls = document.getElementById('controls');
+  Object.keys(SERIES).forEach(key => {
+    const s = SERIES[key];
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', key === active ? 'true' : 'false');
+    btn.style.setProperty('--dot', seriesColor(s.slot));
+    btn.innerHTML = '<span class="dot"></span>' + s.label;
+    btn.addEventListener('click', () => {
+      if (active === key) return;
+      active = key;
+      document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', 'false'));
+      btn.setAttribute('aria-pressed', 'true');
+      render();
+    });
+    controls.appendChild(btn);
+  });
+
+  const svg = document.getElementById('chart');
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const W = 680, H = 300;
+  const PAD = { top: 14, right: 14, bottom: 30, left: 54 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+
+  const tooltip = document.getElementById('tooltip');
+  const ttYear = document.getElementById('ttYear');
+  const ttVal = document.getElementById('ttVal');
+  const ttDelta = document.getElementById('ttDelta');
+  const accentBar = document.getElementById('accentBar');
+
+  function niceMax(v){
+    const mag = Math.pow(10, Math.floor(Math.log10(v)));
+    const n = v / mag;
+    let f;
+    if (n <= 1) f = 1; else if (n <= 2) f = 2; else if (n <= 5) f = 5; else f = 10;
+    return f * mag;
+  }
+
+  function el(tag, attrs){
+    const e = document.createElementNS(svgNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // Catmull-Rom -> cubic bezier smoothing
+  function smoothPath(pts){
+    if (pts.length < 2) return '';
+    let d = `M ${pts[0].x} ${pts[0].y} `;
+    for (let i = 0; i < pts.length - 1; i++){
+      const p0 = pts[i - 1] || pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[i + 2] || p2;
+      const c1x = p1.x + (p2.x - p0.x) / 6;
+      const c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6;
+      const c2y = p2.y - (p3.y - p1.y) / 6;
+      d += `C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y} `;
+    }
+    return d;
+  }
+
+  function render(){
+    const s = SERIES[active];
+    const color = seriesColor(s.slot);
+    accentBar.style.setProperty('--dot', color);
+    document.getElementById('chartTitle').textContent = s.label;
+    document.getElementById('chartUnit').textContent = s.unit;
+
+    const vals = s.values;
+    const rawMax = Math.max(...vals);
+    const rawMin = Math.min(...vals);
+    const yMax = niceMax(rawMax * 1.1);
+    const yLo = rawMin - 0 < yMax * 0.5 ? 0 : 0;
+
+    const x = i => PAD.left + (i / (YEARS.length - 1)) * plotW;
+    const y = v => PAD.top + plotH - ((v - yLo) / (yMax - yLo)) * plotH;
+
+    const gradId = 'grad-' + active;
+    svg.innerHTML = '';
+
+    const defs = el('defs', {});
+    const grad = el('linearGradient', { id: gradId, x1:0, y1:0, x2:0, y2:1 });
+    grad.appendChild(el('stop', { offset:'0%', 'stop-color': color, 'stop-opacity': 0.22 }));
+    grad.appendChild(el('stop', { offset:'100%', 'stop-color': color, 'stop-opacity': 0 }));
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    const g = el('g', { class: 'chart-anim' });
+    svg.appendChild(g);
+
+    // gridlines + y labels
+    const ticks = 4;
+    for (let t = 0; t <= ticks; t++){
+      const val = yLo + (t / ticks) * (yMax - yLo);
+      const yy = y(val);
+      g.appendChild(el('line', { x1: PAD.left, x2: W - PAD.right, y1: yy, y2: yy, class: 'gridline' }));
+      const lbl = el('text', { x: PAD.left - 8, y: yy + 4, class: 'axis-label', 'text-anchor': 'end' });
+      lbl.textContent = s.fmt(val).replace(/\.00$/,'');
+      g.appendChild(lbl);
+    }
+
+    // x labels
+    YEARS.forEach((yr, i) => {
+      const lbl = el('text', { x: x(i), y: H - 8, class: 'x-label', 'text-anchor': 'middle' });
+      lbl.textContent = yr;
+      g.appendChild(lbl);
+    });
+
+    const pts = vals.map((v,i) => ({ x: x(i), y: y(v) }));
+
+    // area fill (smoothed)
+    let areaD = smoothPath(pts);
+    areaD += `L ${pts[pts.length-1].x} ${PAD.top+plotH} L ${pts[0].x} ${PAD.top+plotH} Z`;
+    g.appendChild(el('path', { d: areaD, fill: `url(#${gradId})`, stroke: 'none' }));
+
+    // line (smoothed)
+    g.appendChild(el('path', { d: smoothPath(pts), class: 'line-path', stroke: color }));
+
+    // crosshair
+    const crosshair = el('line', { x1:0, x2:0, y1: PAD.top, y2: PAD.top+plotH, class: 'crosshair' });
+    g.appendChild(crosshair);
+
+    // points + hit areas
+    vals.forEach((v,i) => {
+      const cx = x(i), cy = y(v);
+      const isLast = i === vals.length - 1;
+      g.appendChild(el('circle', { cx, cy, r: isLast ? 6.5 : 5, fill: color, class: 'pt' }));
+      const hit = el('circle', { cx, cy, r: 18, class: 'pt-hit' });
+      hit.addEventListener('pointerenter', () => showTip(i));
+      hit.addEventListener('pointermove', () => showTip(i));
+      hit.addEventListener('pointerleave', hideTip);
+      hit.addEventListener('focus', () => showTip(i));
+      hit.addEventListener('blur', hideTip);
+      hit.setAttribute('tabindex', '0');
+      g.appendChild(hit);
+    });
+
+    // endpoint direct label
+    const lastI = vals.length - 1;
+    const lastPt = pts[lastI];
+    const nearRightEdge = lastPt.x > W - PAD.right - 66;
+    const endLbl = el('text', {
+      x: nearRightEdge ? lastPt.x - 10 : lastPt.x + 10,
+      y: lastPt.y - 12,
+      class: 'end-label', fill: color,
+      'text-anchor': nearRightEdge ? 'end' : 'start'
+    });
+    endLbl.textContent = s.fmt(vals[lastI]);
+    g.appendChild(endLbl);
+
+    requestAnimationFrame(() => g.classList.add('in'));
+
+    function showTip(i){
+      crosshair.setAttribute('x1', x(i));
+      crosshair.setAttribute('x2', x(i));
+      crosshair.style.opacity = 1;
+      const rect = svg.getBoundingClientRect();
+      const wrapRect = svg.parentElement.getBoundingClientRect();
+      const px = rect.left - wrapRect.left + (x(i) / W) * rect.width;
+      const py = rect.top - wrapRect.top + (y(vals[i]) / H) * rect.height;
+      tooltip.style.left = px + 'px';
+      tooltip.style.top = (py - 10) + 'px';
+      tooltip.style.opacity = 1;
+      ttYear.textContent = YEARS[i].replace('*', ' · dato a sept.');
+      ttVal.textContent = s.fmt(vals[i]);
+      if (i > 0){
+        const delta = ((vals[i] - vals[i-1]) / vals[i-1]) * 100;
+        const up = delta >= 0;
+        ttDelta.textContent = (up ? '▲ ' : '▼ ') + Math.abs(delta).toFixed(1) + '%';
+        ttDelta.style.color = up ? '#35c95d' : '#e66767';
+      } else {
+        ttDelta.textContent = '';
+      }
+    }
+    function hideTip(){
+      tooltip.style.opacity = 0;
+      crosshair.style.opacity = 0;
+    }
+
+    // delta pill (variación total del período)
+    const total = ((vals[vals.length-1] - vals[0]) / vals[0]) * 100;
+    const pill = document.getElementById('deltaPill');
+    const up = total >= 0;
+    pill.className = 'delta-pill ' + (up ? 'up' : 'down');
+    pill.innerHTML = '<span class="cap">21&rarr;26</span>' + (up ? '▲ +' : '▼ ') + total.toFixed(1) + '%';
+  }
+
+  render();
+  window.addEventListener('resize', render);
+})();
+</script>
+
+</body>
+</html>
