@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tasa de la Fed, deuda global y Brent (2016–2026)</title>
+<style>
+:root{--bg:#ffffff;--text:#0b0b0b;--sec:#52514e;--muted:#898781;--border:rgba(11,11,11,.18);--sel:#f1f0ec;--vio:#6250d6}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--text:#f0efec;--sec:#c3c2b7;--muted:#898781;--border:rgba(255,255,255,.2);--sel:#2c2c2a;--vio:#9085e9}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px}
+h1{font-size:22px;font-weight:500;margin:0 0 20px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 16px}
+button{font:inherit;font-size:13px;color:var(--text);background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer}
+button.on{background:var(--sel)}
+.lbl{font-size:13px;color:var(--sec);margin:18px 0 4px;display:flex;align-items:center;gap:6px}
+.leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--sec);margin:0 0 6px}
+.leg span{display:flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.ln{width:18px;border-top-width:2px;display:inline-block}
+.box{position:relative}
+.src{font-size:12px;color:var(--muted);margin:24px 0 0}
+.sp{flex:1}
+</style>
+</head>
+<body>
+<main>
+<h1>Tasa de la Fed, deuda global y Brent (2016–2026)</h1>
+<div class="controls">
+<button id="b-sep">Por separado</button>
+<button id="b-norm">Comparar en escala relativa</button>
+<span class="sp"></span>
+<span style="font-size:12px;color:var(--muted)">Deuda:</span>
+<button id="b-usd">Billones USD</button>
+<button id="b-pct">% del PBI</button>
+</div>
+
+<div id="sep">
+<div class="lbl" style="margin-top:0"><span class="sw" style="background:#2a78d6"></span>Tasa de la Fed (techo del rango, fin de año, %)</div>
+<div class="box" style="height:180px"><canvas id="c1" role="img" aria-label="Tasa de la Fed 2016 a 2026"></canvas></div>
+<div class="lbl" id="dlabel">Deuda global (billones de USD)</div>
+<div class="leg">
+<span><span class="ln" style="border-top-style:solid;border-color:#eb6834"></span>FMI</span>
+<span><span class="ln" style="border-top-style:dashed;border-color:var(--vio)"></span>IIF</span>
+</div>
+<div class="box" style="height:220px"><canvas id="c2" role="img" aria-label="Deuda global según FMI e IIF"></canvas></div>
+<div class="lbl"><span class="sw" style="background:#1baf7a"></span>Brent (promedio anual, USD/barril)</div>
+<div class="box" style="height:180px"><canvas id="c3" role="img" aria-label="Precio del Brent 2016 a 2026"></canvas></div>
+</div>
+
+<div id="norm" style="display:none">
+<div class="leg">
+<span><span class="ln" style="border-top-style:solid;border-color:#2a78d6"></span>Tasa Fed</span>
+<span><span class="ln" style="border-top-style:solid;border-color:#eb6834"></span>Deuda FMI</span>
+<span><span class="ln" style="border-top-style:dashed;border-color:var(--vio)"></span>Deuda IIF</span>
+<span><span class="ln" style="border-top-style:dotted;border-color:#1baf7a"></span>Brent</span>
+</div>
+<div class="box" style="height:460px"><canvas id="c4" role="img" aria-label="Series en escala relativa, mínimo 0 y máximo 100"></canvas></div>
+</div>
+
+<p class="src">Fuentes: Reserva Federal, FMI, IIF, EIA.</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const Y=['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026*'];
+const fed=[0.75,1.5,2.5,1.75,0.25,0.25,4.5,5.5,4.5,3.75,4.0];
+const imf={pct:[225,225,226,228,258,247,238,237,235.5,null,null],usd:[164,184,188,199,226,235,235,250,251,null,null]};
+const iif={pct:[327,318,318,322,355,351,336,330,328,308,310],usd:[217,237,244,255,281,303,299,313,318,348,365.5]};
+const brent=[43.7,54.2,71.3,64.3,41.8,70.9,100.9,82.5,80.5,69.0,92];
+const dark=matchMedia('(prefers-color-scheme: dark)').matches;
+const grid=dark?'#2c2c2a':'#e1e0d9',tick='#898781',vio=dark?'#9085e9':'#6250d6';
+let dm='usd';
+const nf=(v,d)=>v.toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const F={fed:v=>nf(v,2)+'%',pct:v=>nf(v,0)+'% PBI',usd:v=>'US$ '+nf(v,v%1?1:0)+' billones',brent:v=>'US$ '+nf(v,1)};
+function base(){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{}},scales:{x:{grid:{display:false},ticks:{color:tick,autoSkip:false}},y:{grid:{color:grid},ticks:{color:tick}}}}}
+function ds(d,c,dash,lab){return{label:lab,data:d,borderColor:c,backgroundColor:c,borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0.25,borderDash:dash||[]}}
+const o1=base();o1.scales.y.ticks.callback=v=>v+'%';o1.plugins.tooltip.callbacks={label:c=>'Tasa: '+F.fed(c.raw)};
+new Chart(c1,{type:'line',data:{labels:Y,datasets:[Object.assign(ds(fed,'#2a78d6'),{stepped:'middle',tension:0})]},options:o1});
+const o2=base();o2.plugins.tooltip.callbacks={label:c=>c.dataset.label+': '+(c.raw==null?'sin dato':F[dm](c.raw))};
+const ch2=new Chart(c2,{type:'line',data:{labels:Y,datasets:[ds(imf.usd,'#eb6834',[],'FMI'),ds(iif.usd,vio,[6,4],'IIF')]},options:o2});
+const o3=base();o3.scales.y.ticks.callback=v=>'$'+v;o3.plugins.tooltip.callbacks={label:c=>'Brent: '+F.brent(c.raw)};
+new Chart(c3,{type:'line',data:{labels:Y,datasets:[ds(brent,'#1baf7a')]},options:o3});
+function nz(a){const v=a.filter(x=>x!=null),mn=Math.min(...v),mx=Math.max(...v);return a.map(x=>x==null?null:Math.round((x-mn)/(mx-mn)*100))}
+let ch4=null;
+function drawNorm(){const raws=[fed,imf[dm],iif[dm],brent],fs=[F.fed,F[dm],F[dm],F.brent],names=['Tasa Fed','Deuda FMI','Deuda IIF','Brent'];
+const o=base();o.scales.y.min=-5;o.scales.y.max=105;o.plugins.tooltip.callbacks={label:c=>{const r=raws[c.datasetIndex][c.dataIndex];return names[c.datasetIndex]+': '+(r==null?'sin dato':fs[c.datasetIndex](r))}};
+const data={labels:Y,datasets:[ds(nz(fed),'#2a78d6'),ds(nz(imf[dm]),'#eb6834'),ds(nz(iif[dm]),vio,[6,4]),ds(nz(brent),'#1baf7a',[2,3])]};
+if(ch4){ch4.data=data;ch4.options=o;ch4.update()}else ch4=new Chart(c4,{type:'line',data,options:o})}
+const bsep=document.getElementById('b-sep'),bnorm=document.getElementById('b-norm'),bpct=document.getElementById('b-pct'),busd=document.getElementById('b-usd');
+function sel(a,b){a.classList.add('on');b.classList.remove('on')}
+function setView(v){sep.style.display=v==='sep'?'block':'none';norm.style.display=v==='norm'?'block':'none';if(v==='norm')drawNorm();v==='sep'?sel(bsep,bnorm):sel(bnorm,bsep)}
+function setDebt(m){dm=m;ch2.data.datasets[0].data=imf[m];ch2.data.datasets[1].data=iif[m];ch2.options.scales.y.ticks.callback=m==='pct'?(v=>v+'%'):(v=>'$'+v);ch2.update();dlabel.textContent=m==='pct'?'Deuda global (% del PBI mundial)':'Deuda global (billones de USD)';if(norm.style.display!=='none')drawNorm();m==='pct'?sel(bpct,busd):sel(busd,bpct)}
+bsep.onclick=()=>setView('sep');bnorm.onclick=()=>setView('norm');bpct.onclick=()=>setDebt('pct');busd.onclick=()=>setDebt('usd');
+setView('sep');setDebt('usd');
+</script>
+</body>
+</html>
