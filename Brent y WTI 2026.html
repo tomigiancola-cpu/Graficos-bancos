@@ -1,0 +1,395 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Brent y WTI 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Editorial-financial look (Economist/Ámbito): red accent, serif headlines, blue/cyan data lines, hairline rules. */
+:root{
+  --bg:#f5f4f1; --surface:#ffffff; --surface-2:#f1f1ee;
+  --fg:#15191f; --muted:#5f666f; --faint:#949aa3;
+  --grid:rgba(21,25,31,.08); --gridm:rgba(21,25,31,.045); --hair:rgba(21,25,31,.14);
+  --accent:#e3120b; --brent:#0c6fa3; --wti:#179bb8;
+  --up:#13835a; --dn:#d12a1e;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141a; --surface:#171e27; --surface-2:#1d2630;
+  --fg:#eceef2; --muted:#949ba6; --faint:#6c7681;
+  --grid:rgba(236,238,242,.08); --gridm:rgba(236,238,242,.045); --hair:rgba(236,238,242,.14);
+  --accent:#f4342c; --brent:#4aa6d6; --wti:#4ec8e0;
+  --up:#37c988; --dn:#f0674f; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f141a; --surface:#171e27; --surface-2:#1d2630;
+  --fg:#eceef2; --muted:#949ba6; --faint:#6c7681;
+  --grid:rgba(236,238,242,.08); --gridm:rgba(236,238,242,.045); --hair:rgba(236,238,242,.14);
+  --accent:#f4342c; --brent:#4aa6d6; --wti:#4ec8e0;
+  --up:#37c988; --dn:#f0674f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding-block:28px;padding-left:16px;padding-right:16px}
+.mast{display:flex;align-items:center;gap:9px;margin:0 0 14px}
+.mast .sq{width:12px;height:12px;background:var(--accent)}
+.mast .kick{font:700 11.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.mast .kick span{color:var(--muted);font-weight:600}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(1.75rem,4.3vw,2.7rem);line-height:1.04;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.lede{color:var(--muted);max-width:66ch;margin:10px 0 0;font-size:.98rem}
+.rule{height:2px;background:var(--fg);opacity:.9;margin:16px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:12px 18px;margin-top:14px;align-items:center}
+.lg{display:inline-flex;align-items:center;gap:7px;font:600 12.5px/1 var(--sans);color:var(--fg)}
+.sw{width:18px;height:3px;border-radius:0;display:inline-block}
+.sw.b{background:var(--brent)} .sw.w{background:var(--wti)}
+.lg.mk .sw{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.hint{color:var(--faint);font-size:12px;margin-left:auto}
+.card{background:var(--surface);border:1px solid var(--hair)}
+#chartBox{margin-top:16px;padding:12px 12px 8px}
+#chart{display:block;width:100%;height:auto;aspect-ratio:1000/428;touch-action:manipulation;cursor:crosshair;outline:none}
+#chart:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.line-brent{fill:none;stroke:var(--brent);stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+.line-wti{fill:none;stroke:var(--wti);stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+.ev-b{fill:var(--brent)} .ev-w{fill:var(--wti)}
+.sel-ring{fill:none;stroke:var(--surface);stroke-width:2.4}
+.sel-halo{fill:none;stroke:var(--accent);stroke-width:1.5}
+.guide{stroke:var(--accent);stroke-opacity:.55;stroke-width:1.2}
+.grid{stroke:var(--grid);stroke-width:1}
+.gridm{stroke:var(--gridm);stroke-width:1}
+.axis{fill:var(--muted);font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+.axis-m{fill:var(--muted);font-family:var(--sans);font-size:12.5px;font-weight:500}
+.warmark{stroke:var(--accent);stroke-opacity:.5;stroke-width:1.2;stroke-dasharray:3 4}
+.warlab{fill:var(--accent);font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:.02em}
+
+#detail{margin-top:14px;padding:18px 20px 20px;position:relative}
+#detail::before{content:"";position:absolute;top:-1px;left:-1px;right:-1px;height:3px;background:var(--accent)}
+.d-head{display:flex;align-items:center;gap:8px}
+.d-tag{width:10px;height:10px;background:var(--accent);display:inline-block}
+.d-eyebrow{font:700 11px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
+.d-date{font-family:var(--serif);font-weight:700;font-size:1.4rem;line-height:1.1;letter-spacing:-.01em;margin:6px 0 0}
+.d-figs{display:grid;grid-template-columns:repeat(3,1fr);margin-top:14px;border:1px solid var(--hair);border-radius:0}
+.fig{padding:10px 12px;border-left:1px solid var(--hair)}
+.fig:first-child{border-left:0}
+.fig .fl{font:600 10.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.fig .fv{display:block;font:700 1.45rem/1.05 var(--sans);font-variant-numeric:tabular-nums;margin-top:6px}
+.fig .fc{font:600 12px/1 var(--sans);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .dn{color:var(--dn)}
+.d-event{font-family:var(--serif);font-size:1.08rem;line-height:1.55;color:var(--fg);margin:16px 0 0}
+footer{margin-top:16px;color:var(--faint);font-size:12px;max-width:80ch}
+@media(max-width:460px){.d-figs{grid-template-columns:1fr 1fr}.fig:nth-child(3){grid-column:1/-1;border-left:0;border-top:1px solid var(--hair)}}
+@media(prefers-reduced-motion:no-preference){.sel-ring,.sel-halo,.dot-sel{transition:cx .08s,cy .08s}}
+</style>
+
+<div class="wrap">
+  <div class="mast"><span class="sq"></span><span class="kick">Mercado de petróleo &nbsp;·&nbsp; <span>2026</span></span></div>
+  <h1>Brent y WTI: la línea de tiempo del año</h1>
+  <p class="lede">Los cierres diarios del crudo en 2026 y el detonante geopolítico detrás de cada movimiento. Pasá el cursor o tocá cualquier hito marcado para leer el detalle; las flechas ↔ saltan de hito en hito.</p>
+  <div class="rule"></div>
+  <div class="legend">
+    <span class="lg"><span class="sw b"></span>Brent</span>
+    <span class="lg"><span class="sw w"></span>WTI</span>
+    <span class="lg mk"><span class="sw"></span>Hito</span>
+    <span class="hint">53 hitos · 199 ruedas</span>
+  </div>
+
+  <div class="card" id="chartBox">
+    <svg id="chart" role="img" tabindex="0" viewBox="0 0 1000 428" aria-label="Línea de tiempo diaria del precio del Brent y el WTI en 2026"></svg>
+  </div>
+
+  <div class="card" id="detail" aria-live="polite">
+    <div class="d-head"><span class="d-tag"></span><span class="d-eyebrow" id="dEye">Jornada clave</span></div>
+    <p class="d-date" id="dDate">—</p>
+    <div class="d-figs">
+      <div class="fig"><span class="fl">Brent</span><span class="fv" id="dBrent">—</span><span class="fc" id="dBchg"></span></div>
+      <div class="fig"><span class="fl">WTI</span><span class="fv" id="dWti">—</span><span class="fc" id="dWchg"></span></div>
+      <div class="fig"><span class="fl">Spread B–W</span><span class="fv" id="dSpread">—</span><span class="fc" id="dSpreadNote"></span></div>
+    </div>
+    <p class="d-event" id="dEvent">—</p>
+  </div>
+
+  <footer>
+    US$ por barril, cierres diarios (2 de enero – 9 de octubre de 2026).
+  </footer>
+</div>
+
+<script>
+const DATA=[
+{d:"2026-01-02",b:60.75,w:57.32},
+{d:"2026-01-05",b:61.76,w:58.08},
+{d:"2026-01-06",b:60.7,w:56.94},
+{d:"2026-01-07",b:59.96,w:55.99},
+{d:"2026-01-08",b:61.99,w:57.76},
+{d:"2026-01-09",b:63.34,w:59.12,e:"Arranca 2026 con el crudo en torno a los US$60. Las protestas en Irán y los ataques rusos sobre refinerías ucranianas sostienen el precio, pero la perspectiva dominante es bajista: el mercado descuenta un superávit de 3 a 4 millones de barriles diarios por el desarme de recortes de la OPEP+ y la oferta récord de EEUU."},
+{d:"2026-01-12",b:63.87,w:59.32},
+{d:"2026-01-13",b:65.47,w:60.93},
+{d:"2026-01-14",b:66.52,w:62.02},
+{d:"2026-01-15",b:63.76,w:59.19,e:"Cae más de 4%. Se enfría el temor a un conflicto con Irán, suben los inventarios en EEUU y se estabilizan las relaciones con Venezuela tras la intervención militar de EEUU de comienzos de enero, que capturó a Nicolás Maduro y abrió las reservas venezolanas —las mayores del mundo— a las petroleras estadounidenses."},
+{d:"2026-01-16",b:64.13,w:59.44},
+{d:"2026-01-19",b:63.22,w:59.39},
+{d:"2026-01-20",b:64.19,w:60.34},
+{d:"2026-01-21",b:64.53,w:60.62},
+{d:"2026-01-22",b:63.34,w:59.36},
+{d:"2026-01-23",b:65.07,w:61.07},
+{d:"2026-01-26",b:65.59,w:60.63},
+{d:"2026-01-27",b:67.57,w:62.39},
+{d:"2026-01-28",b:68.4,w:63.21},
+{d:"2026-01-29",b:70.71,w:65.42},
+{d:"2026-01-30",b:70.69,w:65.21,e:"Cierra enero en su nivel más alto desde agosto de 2025. La creciente incertidumbre sobre Irán empieza a meterle una prima de riesgo al precio, aún en un mercado percibido como sobreofertado."},
+{d:"2026-02-02",b:66.3,w:62.14},
+{d:"2026-02-03",b:67.33,w:63.21},
+{d:"2026-02-04",b:69.46,w:65.14},
+{d:"2026-02-05",b:67.55,w:63.29,e:"Cae tras acordar EEUU e Irán sentarse a negociar. El mercado lee la vía diplomática como señal de que no habrá disrupción de oferta."},
+{d:"2026-02-06",b:68.05,w:63.55},
+{d:"2026-02-09",b:69.04,w:64.2},
+{d:"2026-02-10",b:68.8,w:63.79},
+{d:"2026-02-11",b:69.4,w:64.46},
+{d:"2026-02-12",b:67.52,w:62.65,e:"Cae: la AIE recorta su previsión de demanda, suben los inventarios en EEUU y crece la expectativa de un acuerdo con Irán. Es la última semana de calma antes de la tormenta."},
+{d:"2026-02-13",b:67.75,w:62.75},
+{d:"2026-02-16",b:67.97,w:63.57},
+{d:"2026-02-17",b:66.87,w:62.33},
+{d:"2026-02-18",b:69.77,w:65.19},
+{d:"2026-02-19",b:71.27,w:66.43,e:"Toca su nivel más alto en seis meses. El temor a una disrupción en Medio Oriente se impone; en los días previos Irán triplica sus exportaciones y vacía tanques anticipando un posible bloqueo."},
+{d:"2026-02-20",b:71.3,w:66.39},
+{d:"2026-02-23",b:71.49,w:66.31},
+{d:"2026-02-24",b:70.77,w:65.63},
+{d:"2026-02-25",b:70.85,w:65.42},
+{d:"2026-02-26",b:70.75,w:65.21},
+{d:"2026-02-27",b:72.48,w:67.02,e:"Siguen las negociaciones EEUU-Irán, pero sin acuerdo a la vista. Al día siguiente, el 28 de febrero, EEUU e Israel lanzan ataques sobre Irán que matan al líder supremo Jamenei: empieza la guerra y la Guardia Revolucionaria advierte que ningún barco pasará por Ormuz."},
+{d:"2026-03-02",b:77.74,w:71.23,e:"Primer gran salto (+7%). Con la guerra ya iniciada, el tráfico por Ormuz cae cerca de 70%, son atacados los primeros petroleros y Qatar frena su producción de gas. Por el estrecho circula alrededor del 20% del petróleo mundial."},
+{d:"2026-03-03",b:81.4,w:74.56,e:"Estalla de lleno la guerra y el Brent toca su máximo desde enero de 2025. La AIE calificará el cierre de Ormuz como la mayor disrupción de oferta de la historia del mercado petrolero."},
+{d:"2026-03-04",b:81.4,w:74.66},
+{d:"2026-03-05",b:85.41,w:81.01},
+{d:"2026-03-06",b:92.69,w:90.9,e:"Trump exige la rendición incondicional de Irán. El WTI sube 35% en la semana —su mayor salto semanal desde que existe el contrato, en 1983—. Irán declara el estrecho cerrado y reclama control total; las aseguradoras marítimas empiezan a retirar cobertura."},
+{d:"2026-03-09",b:98.96,w:91.48,e:"Jornada extrema: ambos crudos tocan casi US$120 intradía (el Brent, US$119,50) y luego ceden cuando Trump afirma que el poder militar iraní está destruido y evalúa tomar el control de Ormuz. Las primas de seguro de carga se multiplican por entre cuatro y seis veces."},
+{d:"2026-03-10",b:87.8,w:82.1,e:"Se desploma 11% al aflojar el pánico inicial. EEUU denuncia que Irán está colocando minas en el estrecho; Arabia Saudita empieza a desviar crudo hacia el puerto de Yanbu, en el Mar Rojo, por el ducto Este-Oeste para esquivar Ormuz."},
+{d:"2026-03-11",b:91.98,w:86.07},
+{d:"2026-03-12",b:100.46,w:94.43},
+{d:"2026-03-13",b:103.14,w:96.84},
+{d:"2026-03-16",b:96.04,w:93.5},
+{d:"2026-03-17",b:99.39,w:96.21},
+{d:"2026-03-18",b:102.92,w:96.32,e:"Pico de la crisis de Ormuz: el diferencial Brent-WTI es el mayor en once años. Irak declara fuerza mayor en sus campos y las exportaciones del Golfo caen cerca de 60% (de 25 a 10 millones de barriles diarios). Al día siguiente el crudo de Dubái marca un récord de US$166."},
+{d:"2026-03-19",b:103.78,w:96.14},
+{d:"2026-03-20",b:106.41,w:98.32},
+{d:"2026-03-23",b:95.92,w:88.13,e:"Cae casi 10% en una rueda de altísima volatilidad, con versiones de tregua y comentarios de Trump sobre negociaciones. Días antes Arabia Saudita había recortado su producción 20%, de 10 a 8 millones de barriles diarios."},
+{d:"2026-03-24",b:100.23,w:92.35},
+{d:"2026-03-25",b:102.22,w:90.32},
+{d:"2026-03-26",b:108.01,w:94.48},
+{d:"2026-03-27",b:112.57,w:99.64},
+{d:"2026-03-30",b:112.78,w:102.88},
+{d:"2026-03-31",b:118.35,w:101.38,e:"El Brent cierra en US$118, cerca de su pico. Irán permite el tránsito a buques de solo cinco países y la Guardia Revolucionaria mantiene vetado el paso a embarcaciones ligadas a EEUU, Israel y sus aliados."},
+{d:"2026-04-01",b:101.16,w:100.12,e:"Se derrumba 14,5% —una de las mayores caídas diarias del año— tras los dichos de Trump de que la guerra terminaría pronto. El mercado, ultrasensible a cada señal diplomática, descuenta una reapertura inminente."},
+{d:"2026-04-02",b:109.03,w:111.54,e:"Rebota casi 8% cuando el optimismo se desinfla. El WTI salta 11% y supera al Brent, dejando el mayor diferencial WTI-Brent desde 2009: con Ormuz cerrado, el crudo estadounidense se revaloriza frente al que queda atrapado en el Golfo."},
+{d:"2026-04-06",b:109.77,w:112.41},
+{d:"2026-04-07",b:109.27,w:112.95},
+{d:"2026-04-08",b:94.75,w:94.41,e:"Mayor caída diaria desde abril de 2020 (Brent −13%, WTI −16%). Se anuncia un alto el fuego temporal entre EEUU e Irán que incluye la reapertura del estrecho; tres días después EEUU envía destructores a limpiar minas."},
+{d:"2026-04-09",b:95.92,w:97.87},
+{d:"2026-04-10",b:95.2,w:96.57},
+{d:"2026-04-13",b:99.36,w:92.95},
+{d:"2026-04-14",b:94.79,w:88.19},
+{d:"2026-04-15",b:94.93,w:88.13},
+{d:"2026-04-16",b:99.39,w:94.69},
+{d:"2026-04-17",b:90.38,w:83.85,e:"El canciller iraní declara abierto Ormuz y el crudo se desploma (WTI −11%). Pero el alivio dura poco: las conversaciones de Islamabad fracasan y Trump impone un bloqueo naval a los puertos iraníes, un 'doble bloqueo' que vuelve a trabar el tránsito."},
+{d:"2026-04-20",b:90.43,w:89.61},
+{d:"2026-04-21",b:93.24,w:92.13},
+{d:"2026-04-22",b:96.18,w:92.96},
+{d:"2026-04-23",b:99.35,w:95.85},
+{d:"2026-04-24",b:105.33,w:94.4,e:"Salta 6%. Se reactivan los problemas en Ormuz, renuncia el principal negociador iraní e Irán vuelve a cerrar el estrecho; hay nuevos ataques a buques y la OMI reporta unos 20.000 marinos y 2.000 barcos varados en el Golfo."},
+{d:"2026-04-27",b:108.23,w:96.37},
+{d:"2026-04-28",b:111.26,w:99.93},
+{d:"2026-04-29",b:118.03,w:106.88,e:"Trump amenaza con sostener el bloqueo hasta cerrar un acuerdo y el Brent salta 6%. La escalada verbal reinstala de lleno la prima de guerra en el precio."},
+{d:"2026-04-30",b:114.01,w:105.07,e:"Máximo del año: el Brent toca US$126,41 intradía antes de cerrar en US$114, su valor más alto en cuatro años. Decenas de buques y cientos de miles de barriles diarios siguen fuera del mercado."},
+{d:"2026-05-01",b:108.17,w:101.94},
+{d:"2026-05-04",b:114.44,w:106.42,e:"Sube casi 6% cuando nuevos ataques debilitan el alto el fuego. EEUU lanza la Operación Project Freedom para escoltar buques mercantes a través del estrecho."},
+{d:"2026-05-05",b:109.87,w:102.27},
+{d:"2026-05-06",b:101.27,w:95.08,e:"Cae con fuerza (−8%) por versiones de un acuerdo cercano; Trump pausa la escolta de buques citando avances en las negociaciones. Es el primer cierre del WTI por debajo de US$100 en seis días."},
+{d:"2026-05-07",b:100.06,w:94.81},
+{d:"2026-05-08",b:101.29,w:95.42},
+{d:"2026-05-11",b:104.21,w:98.07},
+{d:"2026-05-12",b:107.77,w:102.18,e:"Repunta: un acuerdo EEUU-Irán vuelve a lucir improbable. Aramco informa que más de 600 barcos siguen atrapados en el Golfo."},
+{d:"2026-05-13",b:105.63,w:101.02},
+{d:"2026-05-14",b:105.72,w:101.17},
+{d:"2026-05-15",b:109.26,w:105.42},
+{d:"2026-05-18",b:107.48,w:108.66},
+{d:"2026-05-19",b:106.71,w:107.77},
+{d:"2026-05-20",b:101.04,w:98.26,e:"Cede más de 5% por la incertidumbre sobre nuevos ataques de EEUU. El mercado oscila al ritmo de cada señal militar o diplomática."},
+{d:"2026-05-21",b:99.5,w:96.35},
+{d:"2026-05-22",b:100.21,w:96.6},
+{d:"2026-05-26",b:99.58,w:93.89},
+{d:"2026-05-27",b:94.29,w:88.68,e:"Cae más de 5% tras los dichos del secretario de Estado Marco Rubio de dar a las negociaciones 'todas las chances de éxito'. La diplomacia vuelve a pesar más que las bombas."},
+{d:"2026-05-28",b:93.71,w:88.9},
+{d:"2026-05-29",b:92.05,w:87.36},
+{d:"2026-06-01",b:94.98,w:92.16,e:"Sube con fuerza (+3%) ante el riesgo de nuevos ataques a Irán, después de que Teherán golpeara un buque en el puerto de Umm Qasr."},
+{d:"2026-06-02",b:96.0,w:93.76},
+{d:"2026-06-03",b:97.81,w:96.02,e:"Sube después de que el premier israelí Benjamin Netanyahu advirtiera que EEUU e Israel podrían volver a atacar a Irán."},
+{d:"2026-06-04",b:95.03,w:93.04},
+{d:"2026-06-05",b:93.09,w:90.54},
+{d:"2026-06-08",b:94.25,w:91.3},
+{d:"2026-06-09",b:91.45,w:88.2},
+{d:"2026-06-10",b:93.1,w:90.03},
+{d:"2026-06-11",b:90.38,w:87.71},
+{d:"2026-06-12",b:87.33,w:84.88,e:"Cae y cierra la semana con −6%: un acuerdo luce más probable. El 17 de junio Trump y el presidente iraní Pezeshkian firman el Memorándum de Islamabad para poner fin a la guerra y a los bloqueos."},
+{d:"2026-06-15",b:82.24,w:79.44,e:"Se hunde casi 6%. Se encamina un alto el fuego entre Israel y Hezbollah y se agota la vía de confrontación; el mercado empieza a descontar la normalización."},
+{d:"2026-06-16",b:78.67,w:75.27},
+{d:"2026-06-17",b:79.23,w:76.79},
+{d:"2026-06-18",b:79.51,w:76.6},
+{d:"2026-06-19",b:80.05,w:76.51},
+{d:"2026-06-22",b:77.52,w:74.82},
+{d:"2026-06-23",b:76.8,w:73.21},
+{d:"2026-06-24",b:73.74,w:70.34,e:"Vuelven los buques por Ormuz y el crudo cae 4%. El WTI baja de US$70 por primera vez desde el 2 de marzo, deshaciendo buena parte de la prima de guerra."},
+{d:"2026-06-25",b:75.26,w:71.92},
+{d:"2026-06-26",b:71.99,w:69.23},
+{d:"2026-06-29",b:73.15,w:70.75},
+{d:"2026-06-30",b:72.92,w:69.5},
+{d:"2026-07-01",b:71.57,w:68.58,e:"Trump dice que las negociaciones van bien y el crudo cae a US$71,57, el mínimo del período de posguerra. El mercado da por superada la crisis… prematuramente."},
+{d:"2026-07-02",b:71.8,w:68.69},
+{d:"2026-07-03",b:72.12,w:68.78},
+{d:"2026-07-06",b:71.99,w:68.55},
+{d:"2026-07-07",b:74.16,w:70.44},
+{d:"2026-07-08",b:78.02,w:73.52,e:"Trump amenaza con más bombardeos a Irán y con bloquear Ormuz; el Brent salta más de 5%. La tregua interina se rompe: EEUU reimpone sanciones petroleras y lanza nuevos ataques."},
+{d:"2026-07-09",b:76.3,w:72.08},
+{d:"2026-07-10",b:76.01,w:71.41},
+{d:"2026-07-13",b:83.3,w:77.94,e:"Salta casi 10% en una sola rueda. La Guardia Revolucionaria vuelve a declarar cerrado el estrecho y EEUU reinstala el bloqueo; se reanudan los ataques a petroleros."},
+{d:"2026-07-14",b:84.73,w:78.68},
+{d:"2026-07-15",b:84.95,w:79.12},
+{d:"2026-07-16",b:84.23,w:78.28},
+{d:"2026-07-17",b:88.1,w:81.78,e:"Kuwait denuncia un ataque iraní a una planta eléctrica y desalinizadora y el crudo salta más de 4%. La guerra se extiende a la infraestructura civil del Golfo."},
+{d:"2026-07-20",b:87.14,w:82.48},
+{d:"2026-07-21",b:88.52,w:84.34},
+{d:"2026-07-22",b:90.18,w:83.64},
+{d:"2026-07-23",b:94.26,w:87.01,e:"Salta 4,5% y el Brent roza otra vez los US$100 intradía por ataques a buques en el Mar Rojo y nuevas amenazas de Trump. En los días previos fueron alcanzados varios petroleros griegos y kuwaitíes."},
+{d:"2026-07-24",b:91.68,w:85.15},
+{d:"2026-07-27",b:88.36,w:82.61,e:"Cae: Irán promete frenar sus ataques si EEUU hace lo mismo. Una vez más, una señal de desescalada alcanza para enfriar el precio."},
+{d:"2026-07-28",b:84.09,w:79.26},
+{d:"2026-07-29",b:90.74,w:84.46},
+{d:"2026-07-30",b:89.03,w:83.59},
+{d:"2026-07-31",b:90.12,w:84.67},
+{d:"2026-08-03",b:83.77,w:80.34,e:"Cae 7% ante la expectativa de una reapertura de Ormuz. Un granelero alcanzado deja una mancha de petróleo de más de 10 km, recordando que el riesgo físico sigue latente."},
+{d:"2026-08-04",b:79.36,w:75.77},
+{d:"2026-08-05",b:79.45,w:75.22},
+{d:"2026-08-06",b:82.49,w:77.29},
+{d:"2026-08-07",b:83.55,w:78.18},
+{d:"2026-08-10",b:87.72,w:81.16,e:"Rebota 5%: el tránsito por el estrecho sigue bajo pese a las versiones de reapertura. La brecha entre expectativa y realidad mantiene el precio nervioso."},
+{d:"2026-08-11",b:88.91,w:81.95},
+{d:"2026-08-12",b:88.98,w:82.17},
+{d:"2026-08-13",b:87.07,w:80.44},
+{d:"2026-08-14",b:88.52,w:82.4,e:"EEUU afirma que el bloqueo de Ormuz continuará y el crudo rebota. Días antes, Irán habría alcanzado con misiles y drones a petroleros de ADNOC, la estatal de los Emiratos."},
+{d:"2026-08-17",b:89.03,w:84.5},
+{d:"2026-08-18",b:89.45,w:84.06},
+{d:"2026-08-19",b:89.79,w:84.39},
+{d:"2026-08-20",b:91.97,w:86.83,e:"Sube más de 2% tras el anuncio de EEUU de 'las sanciones más duras de la historia' a Irán, un día después de que los Emiratos cortaran su comercio con Teherán."},
+{d:"2026-08-21",b:92.67,w:87.06},
+{d:"2026-08-24",b:90.54,w:85.01},
+{d:"2026-08-25",b:87.27,w:82.36,e:"Cae: al mercado le pesan más las sanciones que la amenaza de acción militar directa. EEUU informa haber retirado más de 100 minas del estrecho."},
+{d:"2026-08-26",b:86.63,w:82.23},
+{d:"2026-08-27",b:88.49,w:83.53},
+{d:"2026-08-28",b:88.1,w:83.4},
+{d:"2026-08-31",b:90.49,w:85.76},
+{d:"2026-09-01",b:94.65,w:90.22,e:"Arranca septiembre con una fuerte suba (+4,6%). A fines de agosto EEUU golpea sitios militares en la isla de Larak y la Guardia Revolucionaria responde contra bases estadounidenses en Jordania: la escalada se reactiva."},
+{d:"2026-09-02",b:95.63,w:91.01},
+{d:"2026-09-03",b:95.52,w:91.3},
+{d:"2026-09-04",b:96.28,w:91.48},
+{d:"2026-09-07",b:97.0,w:92.52},
+{d:"2026-09-08",b:97.92,w:93.03},
+{d:"2026-09-09",b:101.21,w:96.05,e:"El Brent supera US$100 por la escalada EEUU-Irán, en su cierre más alto desde el 22 de mayo. La prima de guerra está de vuelta de lleno."},
+{d:"2026-09-10",b:107.63,w:102.48,e:"Salta 6%: drones lanzados desde Irak atacan el ducto Este-Oeste saudita —la única salida del crudo del Reino que no depende de Ormuz— y Arabia lo cierra. Se pierde cerca del 4% de la oferta mundial; al día siguiente el diésel en EEUU marca un récord de US$6,06 el galón."},
+{d:"2026-09-11",b:104.61,w:100.05},
+{d:"2026-09-14",b:105.68,w:97.14},
+{d:"2026-09-15",b:108.75,w:100.75,e:"Firme sobre US$108, máximo de septiembre. A la pérdida del ducto se suma el avance hutí sobre el Bab el-Mandeb —con la toma de la isla de Perim—, que amenaza la ruta alternativa saudí por el Mar Rojo. Aramco avisa a refinadores europeos que no recibirán crudo."},
+{d:"2026-09-16",b:105.83,w:102.43},
+{d:"2026-09-17",b:104.82,w:101.91},
+{d:"2026-09-18",b:103.87,w:96.08},
+{d:"2026-09-21",b:96.24,w:92.37,e:"Se desploma 7% al reanudarse parte del tránsito por Ormuz; en cinco ruedas pierde 17%. La producción saudita, de todos modos, quedó en su nivel más bajo desde 1990."},
+{d:"2026-09-22",b:95.41,w:90.52},
+{d:"2026-09-23",b:98.12,w:92.16},
+{d:"2026-09-24",b:106.6,w:94.61,e:"Rebota casi 9%, uno de los mayores saltos diarios del año, cuando el presidente iraní Pezeshkian afirma que el país no se rendirá y se enfría la expectativa de un acuerdo."},
+{d:"2026-09-25",b:98.82,w:92.41,e:"Corrige más de 7% tras el salto del día anterior: el mercado, exhausto de volatilidad, oscila con cada declaración cruzada."},
+{d:"2026-09-28",b:99.78,w:92.6},
+{d:"2026-09-29",b:97.09,w:89.38},
+{d:"2026-09-30",b:98.03,w:90.42},
+{d:"2026-10-01",b:102.31,w:92.87,e:"Sube más de 4% ante versiones de que EEUU enviaría otro portaaviones a Medio Oriente. El diésel trepa a US$6,40 el galón, reflejo del castigo simultáneo a las refinerías rusas."},
+{d:"2026-10-02",b:102.25,w:91.11},
+{d:"2026-10-05",b:100.32,w:89.43},
+{d:"2026-10-06",b:100.58,w:89.44},
+{d:"2026-10-07",b:100.2,w:88.28},
+{d:"2026-10-08",b:104.28,w:91.49,e:"Salta 4% en una de las últimas ruedas de la serie, con el crudo de nuevo sobre los US$104 y la crisis lejos de resolverse."},
+{d:"2026-10-09",b:104.0,w:91.31,e:"Último dato de la serie: el Brent cierra en US$104. Con la Reserva Estratégica de EEUU en mínimos desde 1982 y la capacidad ociosa de la OPEP+ agotada, el mercado sigue sin red ante el próximo titular."}
+];
+const MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MES3=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+DATA.forEach(d=>{const p=d.d.split("-");d.t=Date.UTC(+p[0],+p[1]-1,+p[2]);});
+const pb=DATA.map((d,i)=>i?(d.b/DATA[i-1].b-1)*100:0);
+const pw=DATA.map((d,i)=>i?(d.w/DATA[i-1].w-1)*100:0);
+const EV=DATA.map((d,i)=>d.e?i:-1).filter(i=>i>=0);
+
+const svg=document.getElementById("chart");
+const VBW=1000, VBH=428;
+const T0=DATA[0].t, T1=DATA[DATA.length-1].t+86400000*3;
+const YMIN=54, YMAX=120, YT=[60,80,100,120], YTM=[70,90,110];
+const m={l:44,r:14,t:18,b:30}, iw=VBW-m.l-m.r, ih=VBH-m.t-m.b;
+const x=t=>m.l+(t-T0)/(T1-T0)*iw, y=v=>m.t+(1-(v-YMIN)/(YMAX-YMIN))*ih;
+const xpx=DATA.map(d=>x(d.t)), ybr=DATA.map(d=>y(d.b)), ywt=DATA.map(d=>y(d.w));
+const TOP=m.t, BOT=m.t+ih;
+let sel=EV[EV.length-1];
+
+function build(){
+  let s="";
+  YTM.forEach(v=>{s+=`<line class="gridm" x1="${m.l}" y1="${y(v).toFixed(1)}" x2="${VBW-m.r}" y2="${y(v).toFixed(1)}"/>`;});
+  YT.forEach(v=>{const yy=y(v).toFixed(1);
+    s+=`<line class="grid" x1="${m.l}" y1="${yy}" x2="${VBW-m.r}" y2="${yy}"/>`;
+    s+=`<text class="axis" x="${m.l-8}" y="${yy}" text-anchor="end" dominant-baseline="middle">${v}</text>`;});
+  for(let mo=0;mo<10;mo++){const tx=x(Date.UTC(2026,mo,1));
+    s+=`<text class="axis-m" x="${tx.toFixed(1)}" y="${VBH-9}" text-anchor="middle">${MES3[mo]}</text>`;}
+  const wx=x(Date.UTC(2026,2,1)).toFixed(1);
+  s+=`<line class="warmark" x1="${wx}" y1="${TOP}" x2="${wx}" y2="${BOT}"/>`;
+  s+=`<text class="warlab" x="${(+wx+5)}" y="${TOP+12}">Guerra con Irán</text>`;
+  s+=`<polyline class="line-wti" points="${DATA.map((d,i)=>xpx[i].toFixed(1)+","+ywt[i].toFixed(1)).join(" ")}"/>`;
+  s+=`<polyline class="line-brent" points="${DATA.map((d,i)=>xpx[i].toFixed(1)+","+ybr[i].toFixed(1)).join(" ")}"/>`;
+  EV.forEach(i=>{
+    s+=`<circle class="ev-w" cx="${xpx[i].toFixed(1)}" cy="${ywt[i].toFixed(1)}" r="3"/>`;
+    s+=`<circle class="ev-b" cx="${xpx[i].toFixed(1)}" cy="${ybr[i].toFixed(1)}" r="3"/>`;});
+  s+=`<g id="ov"></g>`;
+  svg.innerHTML=s; paint();
+}
+function chg(el,v){el.textContent=(v>=0?"▲ +":"▼ ")+v.toFixed(2)+"%";el.className="fc "+(v>=0?"up":"dn");}
+function eyebrow(v){return v>=5?"Fuerte suba":v<=-5?"Fuerte caída":v>0.2?"Suba":v<-0.2?"Baja":"Estable";}
+function paint(){
+  const i=sel,d=DATA[i],px=xpx[i];
+  let o=`<line class="guide" x1="${px.toFixed(1)}" y1="${TOP}" x2="${px.toFixed(1)}" y2="${BOT}"/>`;
+  [["w",ywt[i]],["b",ybr[i]]].forEach(([k,cy])=>{
+    o+=`<circle class="sel-halo" cx="${px.toFixed(1)}" cy="${cy.toFixed(1)}" r="8.5"/>`;
+    o+=`<circle class="ev-${k} dot-sel" cx="${px.toFixed(1)}" cy="${cy.toFixed(1)}" r="6"/>`;
+    o+=`<circle class="sel-ring" cx="${px.toFixed(1)}" cy="${cy.toFixed(1)}" r="6"/>`;});
+  const ov=document.getElementById("ov"); if(ov)ov.innerHTML=o;
+  const p=d.d.split("-");
+  document.getElementById("dEye").textContent=eyebrow(pb[i]);
+  document.getElementById("dDate").textContent=`${+p[2]} de ${MES[+p[1]-1]} de ${p[0]}`;
+  document.getElementById("dBrent").textContent="$"+d.b.toFixed(2);
+  document.getElementById("dWti").textContent="$"+d.w.toFixed(2);
+  chg(document.getElementById("dBchg"),pb[i]); chg(document.getElementById("dWchg"),pw[i]);
+  const sp=d.b-d.w;
+  document.getElementById("dSpread").textContent="$"+sp.toFixed(2);
+  const sn=document.getElementById("dSpreadNote");
+  if(sp<0){sn.textContent="WTI > Brent";sn.className="fc dn";}else{sn.textContent="Brent > WTI";sn.className="fc";sn.style.color="var(--muted)";}
+  document.getElementById("dEvent").textContent=d.e;
+}
+function nearestEvent(clientX){
+  const r=svg.getBoundingClientRect(); if(!r.width)return sel;
+  const sx=(clientX-r.left)*(VBW/r.width);
+  let best=EV[0],bd=1e9;
+  EV.forEach(i=>{const dd=Math.abs(xpx[i]-sx);if(dd<bd){bd=dd;best=i;}});
+  return best;
+}
+function step(dir){
+  let k=EV.indexOf(sel); if(k<0)k=0;
+  k=Math.max(0,Math.min(EV.length-1,k+dir)); sel=EV[k]; paint();
+}
+svg.addEventListener("pointermove",ev=>{if(ev.pointerType==="mouse"){const i=nearestEvent(ev.clientX);if(i!==sel){sel=i;paint();}}});
+svg.addEventListener("pointerdown",ev=>{sel=nearestEvent(ev.clientX);paint();svg.focus({preventScroll:true});});
+svg.addEventListener("keydown",ev=>{
+  if(ev.key==="ArrowRight"){step(1);ev.preventDefault();}
+  else if(ev.key==="ArrowLeft"){step(-1);ev.preventDefault();}
+});
+build();
+</script>
+
+</body></html>
