@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarifas vs. salarios</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1a1a1a; --muted:#6b6b6b; --line:#e6e6e6; --soft:#f5f5f3;
+    --tarifa:#d9480f; --canasta:#8f2d07; --ipc:#8a8a8a; --salario:#1c6dd0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 16px}
+  .kicker{font:700 12px/1 Arial,Helvetica,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--tarifa);margin:0 0 8px}
+  h1{font-size:24px;line-height:1.2;margin:0 0 16px}
+  .sub{font:15px/1.4 Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font:600 14px Arial,Helvetica,sans-serif;border:1px solid var(--line);background:var(--soft);color:var(--ink);
+       padding:8px 14px;border-radius:999px;cursor:pointer;transition:.15s}
+  .tab:hover{border-color:#bbb}
+  .tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .callout{font:15px/1.45 Arial,Helvetica,sans-serif;background:var(--soft);border-left:4px solid var(--tarifa);
+           padding:10px 14px;margin:0 0 16px;min-height:48px}
+  .callout b{color:var(--tarifa)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font:13px Arial,Helvetica,sans-serif;color:var(--muted);margin-bottom:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:2px;display:inline-block}
+  .chart{position:relative}
+  .row{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:10px;height:36px;
+       position:absolute;left:0;right:0;transition:transform .5s ease}
+  .label{font:14px Arial,Helvetica,sans-serif;text-align:right;line-height:1.15}
+  .label small{display:block;color:var(--muted);font-size:11px}
+  .track{position:relative;height:24px}
+  .bar{height:100%;border-radius:0 3px 3px 0;width:0;transition:width .6s ease,opacity .2s;cursor:default}
+  .val{position:absolute;top:50%;transform:translateY(-50%);font:700 14px Arial,Helvetica,sans-serif;
+       white-space:nowrap;transition:left .6s ease;padding-left:6px}
+  .row.dim .bar{opacity:.35}
+  .tip{position:fixed;pointer-events:none;background:#1a1a1a;color:#fff;font:13px/1.4 Arial,Helvetica,sans-serif;
+       padding:8px 10px;border-radius:4px;max-width:240px;opacity:0;transition:opacity .12s;z-index:10}
+  .notes{font:12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted);border-top:1px solid var(--line);margin-top:14px;padding-top:10px}
+  .notes p{margin:0 0 4px}
+  @media (max-width:520px){
+    h1{font-size:20px}
+    .row{grid-template-columns:104px 1fr}
+    .label{font-size:12.5px}
+    .val{font-size:12.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">Tarifas y bolsillo</p>
+  <h1>Los servicios públicos subieron muy por encima de los salarios</h1>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-k="dic23" aria-selected="true">Desde dic. 2023</button>
+    <button class="tab" role="tab" data-k="y2026" aria-selected="false">Acumulado 2026</button>
+    <button class="tab" role="tab" data-k="yoy" aria-selected="false">Interanual</button>
+  </div>
+
+
+  <div class="legend">
+    <span><i style="background:var(--tarifa)"></i>Tarifas</span>
+    <span><i style="background:var(--canasta)"></i>Canasta de servicios</span>
+    <span><i style="background:var(--ipc)"></i>Inflación (IPC)</span>
+    <span><i style="background:var(--salario)"></i>Salarios</span>
+  </div>
+
+  <div class="chart" id="chart"></div>
+
+  <div class="notes">
+    <p><b>Tarifas y canasta:</b> IIEP (UBA-CONICET), Observatorio de Tarifas y Subsidios, hogar tipo del AMBA, a octubre de 2026.</p>
+    <p><b>IPC*:</b> estimación del IIEP en base al REM del BCRA para octubre de 2026.</p>
+    <p><b>Salarios:</b> INDEC, Índice de salarios, último dato disponible (julio de 2026). Interanual: julio 2026 vs. julio 2025.</p>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+  var items = [
+    {id:"transporte", name:"Transporte", t:"tarifa"},
+    {id:"gas", name:"Gas natural", t:"tarifa"},
+    {id:"agua", name:"Agua", t:"tarifa"},
+    {id:"luz", name:"Electricidad", t:"tarifa"},
+    {id:"canasta", name:"Canasta total", t:"canasta"},
+    {id:"ipc", name:"Inflación (IPC)*", t:"ipc"},
+    {id:"priv", name:"Salario privado", sub:"registrado", t:"salario"},
+    {id:"pub", name:"Salario público", t:"salario"}
+  ];
+  var data = {
+    dic23:{transporte:1513,gas:1391,agua:573,luz:387,canasta:860,ipc:261,priv:273,pub:242},
+    y2026:{transporte:55.6,gas:84.3,agua:38.6,luz:11.0,canasta:45.3,ipc:26.1,priv:17.0,pub:21.1},
+    yoy:{transporte:69,gas:47,agua:41,luz:49,canasta:56,ipc:33,priv:29.7,pub:31.0}
+  };
+  var callouts = {
+    dic23:"Desde el inicio de la gestión, la canasta de servicios subió <b>860%</b>, más de tres veces lo que aumentaron los salarios privados registrados (<b style='color:var(--salario)'>273%</b>). El transporte multiplicó su precio por 16.",
+    y2026:"En lo que va de 2026 el gas lidera con <b>+84,3%</b>. La canasta (<b>+45,3%</b>) más que duplica la suba de los salarios privados registrados (<b style='color:var(--salario)'>+17%</b>, a julio).",
+    yoy:"En doce meses la canasta de servicios aumentó <b>56%</b>, frente a una inflación estimada de 33% y salarios privados registrados que subieron <b style='color:var(--salario)'>29,7%</b>."
+  };
+  var period = {
+    dic23:{tar:"dic. 2023 – oct. 2026", sal:"dic. 2023 – jul. 2026"},
+    y2026:{tar:"dic. 2025 – oct. 2026", sal:"dic. 2025 – jul. 2026"},
+    yoy:{tar:"oct. 2025 – oct. 2026", sal:"jul. 2025 – jul. 2026"}
+  };
+  var color = {tarifa:"var(--tarifa)",canasta:"var(--canasta)",ipc:"var(--ipc)",salario:"var(--salario)"};
+  var ROW = 40;
+  var chart = document.getElementById("chart"), tip = document.getElementById("tip");
+  chart.style.height = (items.length*ROW)+"px";
+  var fmt = function(v){ return "+" + v.toLocaleString("es-AR",{maximumFractionDigits:1}) + "%"; };
+  var cur = "dic23";
+
+  var rows = {};
+  items.forEach(function(it){
+    var r = document.createElement("div"); r.className="row";
+    r.innerHTML = '<div class="label">'+it.name+(it.sub?'<small>'+it.sub+'</small>':'')+'</div>'+
+                  '<div class="track"><div class="bar" style="background:'+color[it.t]+'"></div><div class="val" style="color:'+color[it.t]+'"></div></div>';
+    chart.appendChild(r);
+    rows[it.id] = {el:r, bar:r.querySelector(".bar"), val:r.querySelector(".val"), it:it};
+    r.addEventListener("mousemove", function(e){ showTip(it, e); });
+    r.addEventListener("mouseleave", hideTip);
+    r.addEventListener("touchstart", function(e){ showTip(it, e.touches[0]); }, {passive:true});
+  });
+
+  function showTip(it, e){
+    var d = data[cur], v = d[it.id], p = period[cur];
+    var per = it.t==="salario" ? p.sal : p.tar;
+    var html = "<b>"+it.name+(it.sub?" "+it.sub:"")+"</b><br>"+fmt(v)+" · "+per;
+    if(it.t!=="salario"){
+      var ratio = (1+v/100)/(1+d.priv/100);
+      if(ratio>1.05) html += "<br>Pesa "+ratio.toLocaleString("es-AR",{maximumFractionDigits:1})+" veces más sobre el salario privado registrado que al inicio del período";
+      else if(ratio<0.95) html += "<br>Subió menos que el salario privado registrado";
+    }
+    tip.innerHTML = html; tip.style.opacity = 1;
+    var x = Math.min(e.clientX+14, window.innerWidth-tip.offsetWidth-8);
+    tip.style.left = x+"px"; tip.style.top = (e.clientY+14)+"px";
+    Object.keys(rows).forEach(function(k){ rows[k].el.classList.toggle("dim", k!==it.id); });
+  }
+  function hideTip(){
+    tip.style.opacity = 0;
+    Object.keys(rows).forEach(function(k){ rows[k].el.classList.remove("dim"); });
+  }
+
+  function render(k){
+    cur = k;
+    var d = data[k];
+    var max = Math.max.apply(null, items.map(function(i){return d[i.id];}));
+    var order = items.slice().sort(function(a,b){return d[b.id]-d[a.id];});
+    order.forEach(function(it,idx){
+      var r = rows[it.id], pct = d[it.id]/max*82;
+      r.el.style.transform = "translateY("+(idx*ROW)+"px)";
+      r.bar.style.width = pct+"%";
+      r.val.style.left = pct+"%";
+      r.val.textContent = fmt(d[it.id]);
+    });
+    document.querySelectorAll(".tab").forEach(function(b){ b.setAttribute("aria-selected", b.dataset.k===k); });
+    hideTip();
+  }
+  document.querySelectorAll(".tab").forEach(function(b){ b.addEventListener("click", function(){ render(b.dataset.k); }); });
+  render("dic23");
+})();
+</script>
+</body>
+</html>
