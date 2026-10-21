@@ -1,0 +1,245 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Salarios vs. inflación</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: encabezado con veredicto, tarjeta de controles, gráfico ancho, tabla mensual debajo */
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --fg:#17201d; --muted:#5d6a65; --line:#dfe4e0;
+  --wage:#1d7a68; --wage-soft:#7fc2b2; --infl:#cf5a34; --infl-soft:#efb39d;
+  --win:#1d7a68; --lose:#cf5a34; --tie:#8a948f;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#18201d; --fg:#e7ece9; --muted:#9aa6a1; --line:#2a3430;
+  --wage:#4cc2a6; --wage-soft:#2c6d5f; --infl:#f07d55; --infl-soft:#7a3f2b;
+  --win:#4cc2a6; --lose:#f07d55; --tie:#7d8883; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#18201d; --fg:#e7ece9; --muted:#9aa6a1; --line:#2a3430;
+  --wage:#4cc2a6; --wage-soft:#2c6d5f; --infl:#f07d55; --infl-soft:#7a3f2b;
+  --win:#4cc2a6; --lose:#f07d55; --tie:#7d8883; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:22px}
+header{display:grid;gap:8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.4vw,44px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 .w{color:var(--wage)} h1 .i{color:var(--infl)}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:2px}
+.stat .k{font-size:12.5px;color:var(--muted)}
+.stat .v{font-family:var(--display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.stat .s{font-size:12.5px;color:var(--muted)}
+.pos{color:var(--win)} .neg{color:var(--lose)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
+.controls{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end}
+.ctl{display:grid;gap:6px}
+.ctl > span{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:500 13.5px var(--body);background:transparent;color:var(--fg);border:0;border-right:1px solid var(--line);padding:7px 12px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg button:focus-visible,select:focus-visible{outline:2px solid var(--wage);outline-offset:2px}
+select{font:500 13.5px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.legend .tri{width:0;height:0;border-radius:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid var(--win);background:none}
+.legend .tri.l{border-bottom-color:var(--lose)}
+.chartbox{position:relative;height:440px;min-width:0}
+@media (max-width:600px){.chartbox{height:360px}}
+.note{font-size:12.5px;color:var(--muted);margin:0;max-width:90ch}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13.5px;min-width:520px}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font:500 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.num{font-family:var(--mono)}
+.pill{display:inline-block;font:600 11.5px var(--body);padding:2px 8px;border-radius:999px}
+.pill.w{background:color-mix(in srgb,var(--wage) 16%,transparent);color:var(--wage)}
+.pill.l{background:color-mix(in srgb,var(--infl) 16%,transparent);color:var(--infl)}
+.pill.t{background:color-mix(in srgb,var(--tie) 18%,transparent);color:var(--muted)}
+h2{font-family:var(--display);font-size:20px;margin:0;font-weight:700}
+footer{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+footer a{color:inherit}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Argentina · dic 2023 – ago 2026 · variación % mensual</div>
+    <h1>¿Quién ganó cada mes: <span class="w">salarios</span> o <span class="i">inflación</span>?</h1>
+  </header>
+
+  <section class="panel">
+    <div class="controls">
+      <label class="ctl"><span>Salario</span>
+        <select id="sector">
+          <option value="total">Índice de salarios total</option>
+          <option value="priv">Sector privado registrado</option>
+          <option value="pub">Sector público</option>
+          <option value="noreg">Sector privado no registrado</option>
+        </select>
+      </label>
+      <div class="ctl"><span>Período</span>
+        <div class="seg" id="range">
+          <button data-r="all" aria-pressed="true">Todo</button>
+          <button data-r="2024" aria-pressed="false">2024</button>
+          <button data-r="2025" aria-pressed="false">2025</button>
+          <button data-r="2026" aria-pressed="false">2026</button>
+        </div>
+      </div>
+      <div class="ctl"><span>Vista</span>
+        <div class="seg" id="mode">
+          <button data-m="stacked" aria-pressed="true">Apiladas</button>
+          <button data-m="grouped" aria-pressed="false">Lado a lado</button>
+          <button data-m="real" aria-pressed="false">Salario real</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="chartbox"><canvas id="chart" aria-label="Gráfico de salarios e inflación mensual"></canvas></div>
+    <p class="note" id="note"></p>
+  </section>
+
+  <footer>
+    <div>Fuentes: INDEC, Índice de salarios (informes de diciembre de 2024 y agosto de 2026) e Índice de precios al consumidor, nivel general nacional.</div>
+    <div>Salario real = (1 + salario) / (1 + inflación) − 1. Se considera empate una diferencia menor a 0,05 puntos.</div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+// [total, privado registrado, público, privado no registrado, IPC]
+const RAW={
+2023:[[4.7,4.6,3.9,6.7,6.0],[6.0,6.9,3.8,7.1,6.6],[10.1,7.9,16.3,6.1,7.7],[5.7,6.9,4.1,4.8,8.4],[7.5,8.1,8.5,3.2,7.8],[6.1,5.7,6.0,7.5,6.0],[11.0,10.8,13.3,7.0,6.3],[7.6,8.3,6.0,8.5,12.4],[11.7,13.2,11.0,7.5,12.7],[8.3,8.7,9.1,4.9,8.3],[9.1,9.9,7.8,8.3,12.8],[8.9,11.0,5.5,7.6,25.5]],
+2024:[[16.4,20.0,12.1,11.2,20.6],[13.3,14.1,15.1,5.7,13.2],[10.3,10.0,11.0,9.7,11.0],[10.2,12.0,7.5,7.8,8.8],[8.3,7.7,8.3,11.8,4.2],[6.2,6.7,3.9,9.2,4.6],[7.5,6.3,6.7,15.1,4.0],[5.7,5.0,4.7,10.6,4.2],[4.7,3.8,3.9,10.4,3.5],[4.6,4.0,4.3,7.7,2.7],[3.8,3.3,2.7,8.1,2.4],[3.1,2.8,1.7,6.8,2.7]],
+2025:[[2.9,2.3,0.9,8.6,2.2],[3.8,2.3,4.5,7.9,2.4],[3.0,2.2,3.3,5.1,3.7],[3.4,2.5,2.3,7.7,2.8],[3.0,2.0,3.3,5.6,1.5],[3.0,1.7,1.3,8.9,1.6],[2.5,2.2,2.3,3.6,1.9],[3.2,2.2,2.8,6.0,1.9],[2.2,1.4,1.1,5.7,2.1],[2.5,2.1,1.9,4.2,2.3],[1.8,2.1,1.2,1.7,2.5],[1.6,2.5,1.0,0.1,2.8]],
+2026:[[2.5,2.1,1.8,4.4,2.9],[2.4,1.6,2.3,4.6,2.9],[3.4,2.1,5.0,4.7,3.4],[3.7,4.0,2.3,4.7,2.6],[2.2,2.0,1.5,3.5,2.1],[2.9,1.9,3.4,4.4,1.9],[2.8,2.3,3.0,3.9,2.1],[2.7,2.8,2.3,3.0,1.7]]
+};
+const SECT={total:0,priv:1,pub:2,noreg:3};
+const SECT_NAME={total:"Índice total",priv:"Privado registrado",pub:"Sector público",noreg:"Privado no registrado"};
+const ROWS=[];
+for(const y of [2023,2024,2025,2026]) RAW[y].forEach((r,i)=>{if(y>2023||i===11)ROWS.push({y,m:i,label:MES[i]+" "+String(y).slice(2),r})});
+
+const state={sector:"total",range:"all",mode:"stacked"};
+try{const s=JSON.parse(localStorage.getItem("svi")||"{}");Object.assign(state,s)}catch(e){}
+if(state.range==="2023")state.range="all";
+const save=()=>{try{localStorage.setItem("svi",JSON.stringify(state))}catch(e){}};
+
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt=(v,d=1)=>v.toLocaleString("es-AR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const realOf=(w,p)=>((1+w/100)/(1+p/100)-1)*100;
+const verdict=r=>Math.abs(r)<0.05?"t":(r>0?"w":"l");
+
+function view(){
+  const rows=ROWS.filter(o=>state.range==="all"||o.y==+state.range);
+  const k=SECT[state.sector];
+  return rows.map(o=>{const w=o.r[k],p=o.r[4],real=realOf(w,p);return{...o,w,p,real,v:verdict(real)}});
+}
+
+function renderStats(rows){
+  const won=rows.filter(o=>o.v==="w").length, lost=rows.filter(o=>o.v==="l").length;
+  const cw=rows.reduce((a,o)=>a*(1+o.w/100),1), cp=rows.reduce((a,o)=>a*(1+o.p/100),1);
+  const creal=(cw/cp-1)*100;
+  const best=rows.reduce((a,o)=>o.real>a.real?o:a), worst=rows.reduce((a,o)=>o.real<a.real?o:a);
+  const per=state.range==="all"?"ene 23 – ago 26":(state.range==="2026"?"ene – ago 2026":"año "+state.range);
+  document.getElementById("stats").innerHTML=`
+    <div class="stat"><span class="k">Meses ganados por el salario</span><span class="v"><span class="pos">${won}</span> <span style="color:var(--muted);font-size:18px">de ${rows.length}</span></span><span class="s">${lost} ganó la inflación · ${rows.length-won-lost} empate</span></div>
+    <div class="stat"><span class="k">Salario real acumulado (${per})</span><span class="v ${creal>=0?"pos":"neg"}">${creal>=0?"+":""}${fmt(creal)}%</span><span class="s">Salario +${fmt((cw-1)*100,0)}% · precios +${fmt((cp-1)*100,0)}%</span></div>
+    <div class="stat"><span class="k">Mejor mes</span><span class="v pos">+${fmt(best.real)}%</span><span class="s">${best.label}: salario ${fmt(best.w)}% vs. IPC ${fmt(best.p)}%</span></div>
+    <div class="stat"><span class="k">Peor mes</span><span class="v neg">${fmt(worst.real)}%</span><span class="s">${worst.label}: salario ${fmt(worst.w)}% vs. IPC ${fmt(worst.p)}%</span></div>`;
+}
+
+function renderTable(rows){
+  const lab={w:"Ganó el salario",l:"Ganó la inflación",t:"Empate"};
+  document.querySelector("#tbl tbody").innerHTML=rows.slice().reverse().map(o=>`<tr><td>${o.label}</td><td class="num">${fmt(o.w)}%</td><td class="num">${fmt(o.p)}%</td><td class="num ${o.v==="w"?"pos":o.v==="l"?"neg":""}">${o.real>=0?"+":""}${fmt(o.real,2)}%</td><td><span class="pill ${o.v}">${lab[o.v]}</span></td></tr>`).join("");
+}
+
+function renderLegend(){
+  const L=document.getElementById("legend");
+  if(state.mode==="real"){L.innerHTML=`<span><i style="background:var(--win)"></i>Salario le ganó a la inflación</span><span><i style="background:var(--lose)"></i>Inflación le ganó al salario</span>`;}
+  else L.innerHTML=`<span><i style="background:var(--wage)"></i>Aumento salarial (${SECT_NAME[state.sector]})</span><span><i style="background:var(--infl)"></i>Inflación (IPC)</span><span><i class="tri"></i>Ganó el salario</span><span><i class="tri l"></i>Ganó la inflación</span>`;
+  const n=document.getElementById("note");
+  n.textContent = state.mode==="stacked" ? "En la vista apilada la altura total es solo una forma de mostrar los dos datos juntos; la comparación está en el tamaño de cada tramo y en el triángulo." : state.mode==="real" ? "Cada barra es la variación mensual del salario descontada la inflación del mismo mes." : "";
+  if(state.sector==="noreg") n.textContent += (n.textContent?" ":"")+"El sector no registrado se estima con la EPH y tiene un rezago de cinco meses respecto del mes informado.";
+  n.hidden=!n.textContent;
+}
+
+// Triángulo de ganador arriba de cada columna
+const winnerPlugin={id:"winner",afterDatasetsDraw(ch){
+  if(state.mode==="real")return;
+  const rows=ch.$rows;if(!rows)return;
+  const {ctx}=ch;const meta=ch.getDatasetMeta(state.mode==="stacked"?1:0), meta2=ch.getDatasetMeta(1);
+  ctx.save();
+  rows.forEach((o,i)=>{
+    const b=meta.data[i], b2=meta2.data[i]; if(!b)return;
+    const x=state.mode==="stacked"?b.x:(b.x+b2.x)/2;
+    const top=Math.min(b.y,b2.y)-6;
+    const s=Math.min(7,Math.max(3.5,b.width*0.35));
+    ctx.fillStyle=o.v==="w"?css("--win"):o.v==="l"?css("--lose"):css("--tie");
+    ctx.beginPath();
+    if(o.v==="t"){ctx.arc(x,top-s/2,s/2,0,7)}
+    else if(o.v==="w"){ctx.moveTo(x,top-s*1.4);ctx.lineTo(x-s,top);ctx.lineTo(x+s,top)}
+    else{ctx.moveTo(x,top);ctx.lineTo(x-s,top-s*1.4);ctx.lineTo(x+s,top-s*1.4)}
+    ctx.fill();
+  });
+  ctx.restore();
+}};
+
+let chart;
+function renderChart(rows){
+  const fg=css("--fg"),mut=css("--muted"),line=css("--line");
+  const labels=rows.map(o=>o.label);
+  let datasets;
+  if(state.mode==="real"){
+    datasets=[{label:"Salario real",data:rows.map(o=>+o.real.toFixed(2)),backgroundColor:rows.map(o=>o.real>=0?css("--win"):css("--lose")),borderRadius:3,maxBarThickness:28}];
+  }else{
+    datasets=[
+      {label:"Salario",data:rows.map(o=>o.w),backgroundColor:css("--wage"),borderRadius:state.mode==="stacked"?0:3,maxBarThickness:28,stack:state.mode==="stacked"?"s":"a"},
+      {label:"Inflación",data:rows.map(o=>o.p),backgroundColor:css("--infl"),borderRadius:state.mode==="stacked"?{topLeft:3,topRight:3}:3,maxBarThickness:28,stack:state.mode==="stacked"?"s":"b"}
+    ];
+  }
+  const cfg={type:"bar",data:{labels,datasets},plugins:[winnerPlugin],options:{
+    responsive:true,maintainAspectRatio:false,animation:{duration:matchMedia("(prefers-reduced-motion: reduce)").matches?0:350},
+    layout:{padding:{top:16}},
+    interaction:{mode:"index",intersect:false},
+    scales:{
+      x:{stacked:state.mode==="stacked",grid:{display:false},ticks:{color:mut,font:{family:"IBM Plex Mono",size:11},maxRotation:0,autoSkip:true,autoSkipPadding:8},border:{color:line}},
+      y:{stacked:state.mode==="stacked",grid:{color:line},border:{display:false},ticks:{color:mut,font:{family:"IBM Plex Mono",size:11},callback:v=>(+v).toLocaleString("es-AR",{maximumFractionDigits:1})+"%"},title:{display:true,text:state.mode==="real"?"variación del salario real (%)":"variación mensual (%)",color:mut,font:{family:"Archivo",size:12}}}
+    },
+    plugins:{legend:{display:false},tooltip:{backgroundColor:css("--surface"),titleColor:fg,bodyColor:fg,footerColor:mut,borderColor:line,borderWidth:1,padding:10,
+      titleFont:{family:"Archivo",weight:"600"},bodyFont:{family:"IBM Plex Mono"},footerFont:{family:"Archivo",weight:"500"},
+      callbacks:{
+        label:c=>` ${c.dataset.label}: ${c.raw>=0&&state.mode==="real"?"+":""}${fmt(c.raw,state.mode==="real"?2:1)}%`,
+        footer:items=>{const o=rows[items[0].dataIndex];if(state.mode==="real")return `Salario ${fmt(o.w)}% · IPC ${fmt(o.p)}%`;
+          return o.v==="t"?"Empate":(o.v==="w"?"Ganó el salario":"Ganó la inflación")+` (${o.real>0?"+":""}${fmt(o.real,2)}% real)`}
+      }}}
+  }};
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById("chart"),cfg);
+  chart.$rows=rows;
+}
+
+function render(){
+  document.getElementById("sector").value=state.sector;
+  document.querySelectorAll("#range button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.r===state.range));
+  document.querySelectorAll("#mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===state.mode));
+  const rows=view();
+  renderLegend();
+  if(window.Chart)renderChart(rows);
+  save();
+}
+document.getElementById("sector").addEventListener("change",e=>{state.sector=e.target.value;render()});
+document.getElementById("range").addEventListener("click",e=>{const b=e.target.closest("button");if(b){state.range=b.dataset.r;render()}});
+document.getElementById("mode").addEventListener("click",e=>{const b=e.target.closest("button");if(b){state.mode=b.dataset.m;render()}});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+render();
+</script>
+
+</body></html>
