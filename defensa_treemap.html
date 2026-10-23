@@ -1,0 +1,264 @@
+<title>Gigantes de la defensa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: titular a lo ancho, treemap protagonista agrupado por región y país, tabla comparativa de las 8 fichas debajo */
+:root{
+  --bg:#f5f7fa; --paper:#ffffff; --ink:#0e1a2b; --muted:#5b6b80; --rule:#d9e0ea; --sea:#eef3f9;
+  --gap:#f5f7fa;
+  /* Norteamérica: azul profundo · Europa: azul medio · Asia y Medio Oriente: azul petróleo */
+  --na1:#0d2c5c; --na2:#173e7a; --na3:#24538f;
+  --eu1:#1d5fbf; --eu2:#3374cf; --eu3:#4f8bd8; --eu4:#6d9fde;
+  --as1:#0f5c73; --as2:#1a7088; --as3:#2c869c;
+  --cell-ink:#ffffff;
+  --accent:#1d5fbf; --hot:#c2410c; --good:#0f766e;
+  --display:"Archivo", "Arial Narrow", Arial, sans-serif;
+  --body:"Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0a111c; --paper:#0f1826; --ink:#e7eef8; --muted:#94a3b8; --rule:#22304a; --sea:#0c1522; --gap:#0a111c;
+  --na1:#1b3f78; --na2:#24508f; --na3:#3063a6;
+  --eu1:#2f6fc9; --eu2:#4482d6; --eu3:#5c95dd; --eu4:#7aa9e4;
+  --as1:#17687f; --as2:#227d95; --as3:#3592a8;
+  --accent:#7fb0f0; --hot:#fb923c; --good:#5eead4; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0a111c; --paper:#0f1826; --ink:#e7eef8; --muted:#94a3b8; --rule:#22304a; --sea:#0c1522; --gap:#0a111c;
+  --na1:#1b3f78; --na2:#24508f; --na3:#3063a6;
+  --eu1:#2f6fc9; --eu2:#4482d6; --eu3:#5c95dd; --eu4:#7aa9e4;
+  --as1:#17687f; --as2:#227d95; --as3:#3592a8;
+  --accent:#7fb0f0; --hot:#fb923c; --good:#5eead4; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 36px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.eyebrow{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:22px;height:3px;background:var(--accent)}
+h1{font-family:var(--display);font-variation-settings:"wdth" 78;font-weight:800;font-size:clamp(30px,5vw,52px);line-height:1;letter-spacing:-.01em;margin:10px 0 12px;text-wrap:balance;max-width:20ch}
+.deck{color:var(--muted);font-size:17px;max-width:64ch;margin:0}
+.deck b{color:var(--ink);font-weight:600}
+
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:24px 0 18px;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.fact{padding:12px 16px 14px 0;min-width:0}
+.fact + .fact{padding-left:16px;border-left:1px solid var(--rule)}
+.fact .n{font-family:var(--display);font-variation-settings:"wdth" 85;font-weight:800;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums}
+.fact .t{font-size:13px;color:var(--muted);line-height:1.35;margin-top:4px}
+@media (max-width:720px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact:nth-child(3){padding-left:0;border-left:0}
+  .fact:nth-child(n+3){border-top:1px solid var(--rule)}}
+
+.bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.keys{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--muted)}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{width:14px;height:14px;border-radius:2px;display:inline-block}
+.keys .star{width:auto;height:auto;background:none}
+.seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:3px}
+.seg button{font:600 13.5px var(--display);font-variation-settings:"wdth" 90;border:0;background:transparent;color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.tmwrap{position:relative}
+#tm{position:relative;width:100%;background:var(--gap);border-radius:6px;overflow:hidden}
+.cell{position:absolute;overflow:hidden;color:var(--cell-ink);border:1.5px solid var(--gap);padding:8px 9px;transition:filter .2s,opacity .3s;cursor:default;outline:none}
+.cell.feat{cursor:pointer}
+.cell:hover,.cell.on{filter:brightness(1.18)}
+.cell:focus-visible{box-shadow:inset 0 0 0 3px #fff}
+.dim .cell:not(.feat){opacity:.28}
+.cell .v{font:800 1em var(--display);font-variation-settings:"wdth" 80;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.01em}
+.cell .nm{font:700 .62em var(--display);font-variation-settings:"wdth" 92;line-height:1.1;margin-top:.35em;text-transform:uppercase;letter-spacing:.04em;opacity:.95}
+.cell .ct{position:absolute;right:8px;top:8px;font:700 10px var(--display);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.cell .tag{position:absolute;left:9px;bottom:8px;font:700 9.5px var(--display);letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.92);color:#0e1a2b;padding:2px 6px;border-radius:999px}
+.cell .tag::before{content:"● ";color:#c2410c}
+
+.card{position:absolute;z-index:5;width:310px;max-width:calc(100% - 16px);background:var(--paper);color:var(--ink);border:1px solid var(--rule);border-radius:8px;box-shadow:0 14px 40px rgba(8,18,36,.25);padding:14px 16px 12px;pointer-events:none;opacity:0;transform:translateY(6px) scale(.98);transform-origin:top left;transition:opacity .16s,transform .16s}
+.card.show{opacity:1;transform:none}
+.card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px}
+.card .co{font:800 20px var(--display);font-variation-settings:"wdth" 82;line-height:1.05}
+.card .cc{font:700 10.5px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.card .mc{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.card .mc b{font:800 15px var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}
+.card dt{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding-top:2px;white-space:nowrap}
+.card dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+.card .up{color:var(--good);font-weight:700}
+.dd-bar{display:flex;align-items:center;gap:8px}
+.dd-bar .t{flex:1;height:7px;background:var(--sea);border-radius:4px;overflow:hidden}
+.dd-bar .t span{display:block;height:100%;background:var(--hot)}
+.card .foot2{font-size:11.5px;color:var(--muted);margin-top:8px}
+
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;font-size:12px;color:var(--muted);margin-top:16px;border-top:1px solid var(--rule);padding-top:10px}
+.foot p{margin:0;max-width:86ch}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Defensa · Mercados</div>
+  <h1>Las empresas de defensa más valiosas del mundo</h1>
+
+  <div class="facts" id="facts"></div>
+
+  <div class="bar">
+    <div class="keys">
+      <span><i style="background:var(--na1)"></i>Norteamérica</span>
+      <span><i style="background:var(--eu1)"></i>Europa</span>
+      <span><i style="background:var(--as1)"></i>Asia y Medio Oriente</span>
+      <span><b style="color:var(--hot)">●</b> Con ficha</span>
+    </div>
+    <div class="seg" role="group" aria-label="Filtro">
+      <button id="fAll" aria-pressed="true">Todas</button>
+      <button id="fFeat" aria-pressed="false">Solo con ficha</button>
+    </div>
+  </div>
+
+  <div class="tmwrap" id="tmwrap">
+    <div id="tm" role="img" aria-label="Treemap de capitalización bursátil de empresas de defensa"></div>
+    <div class="card" id="card" aria-live="polite"></div>
+  </div>
+
+
+  <div class="foot">
+    <p>Fuente: Companiesmarketcap (valor de mercado al 22 de octubre de 2026, cotizaciones con demora). Fichas: reportes de resultados de cada compañía. Tras la escisión de Honeywell en 2026 se incluye solo Honeywell Aerospace; se excluye China National Nuclear Power por no ser contratista de defensa. MM = miles de millones de dólares.</p>
+    <p>Infografía interactiva</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const REG = {
+  "EE.UU.":"na", "Francia":"eu","Reino Unido":"eu","Alemania":"eu","Suecia":"eu","Italia":"eu","Noruega":"eu","Chequia":"eu","España":"eu",
+  "China":"as","India":"as","Israel":"as","Turquía":"as","Corea del Sur":"as"
+};
+const REGNAME = {na:"Norteamérica", eu:"Europa", as:"Asia y Medio Oriente"};
+const C = [
+  ["RTX","EE.UU.",258.25],["Safran","Francia",145.55],["Lockheed Martin","EE.UU.",126.95],["General Dynamics","EE.UU.",93.67],
+  ["Northrop Grumman","EE.UU.",76.42],["BAE Systems","Reino Unido",75.50],["Thales","Francia",53.24],["Rheinmetall","Alemania",53.18],
+  ["Honeywell Aerospace","EE.UU.",51.12],["L3Harris","EE.UU.",46.34],["CSSC","China",39.30],["Saab","Suecia",34.93],
+  ["Elbit Systems","Israel",34.64],["HAL","India",34.37],["Aselsan","Turquía",31.78],["Leonardo","Italia",31.19],
+  ["Kongsberg","Noruega",28.96],["Bharat Electronics","India",28.72],["Dassault Aviation","Francia",25.80],["AVIC Shenyang","China",19.96],
+  ["CSG","Chequia",15.70],["Indra","España",12.38],["Hensoldt","Alemania",11.01],["Huntington Ingalls","EE.UU.",10.76],
+  ["Hanwha Systems","Corea del Sur",10.46],["Leonardo DRS","EE.UU.",9.07],["LIG Nex1","Corea del Sur",8.20],["Kratos","EE.UU.",7.27],
+  ["TKMS","Alemania",5.99],["AeroVironment","EE.UU.",5.97],["NextVision","Israel",5.64],["Mercury Systems","EE.UU.",4.59],
+  ["VSE","EE.UU.",4.37],["Bharat Dynamics","India",4.15],["QinetiQ","Reino Unido",3.27]
+].map(([name,country,cap]) => ({name,country,cap,reg:REG[country]}));
+
+const F = {
+  "Lockheed Martin":{backlog:"US$ 292.000 millones",bx:"+US$ 113.000 millones interanual",sales:"+11%",per:"3T",salesN:11,guide:"Elevada por segunda vez",dd:16,pe:19},
+  "RTX":{backlog:"US$ 340.000 millones",bx:"Defensa: US$ 164.000 millones",sales:"+11%",per:"3T",salesN:11,guide:"Elevada por tercera vez",dd:15,pe:26},
+  "Northrop Grumman":{backlog:"US$ 109.600 millones",bx:"+20% interanual",sales:"+7%",per:"3T",salesN:7,guide:"Elevó la previsión de ganancias",dd:30,pe:18.5},
+  "Rheinmetall":{backlog:"€ 80.500 millones",bx:"+44% interanual",sales:"+39%",per:"1S",salesN:39,guide:"Recortó ventas por el programa F126",dd:50,pe:22.6},
+  "BAE Systems":{backlog:"£ 84.000 millones",bx:"Récord",sales:"+9%",per:"1S",salesN:9,guide:"Elevó sus proyecciones",dd:17,pe:21.4},
+  "Leonardo":{backlog:"€ 58.600 millones",bx:"+30% interanual",sales:"+12%",per:"1S",salesN:12,guide:"Elevó pedidos y EBITA; mantuvo ventas",dd:24,pe:18.2},
+  "Thales":{backlog:"€ 19.100 millones",bx:"Pedidos en nueve meses, +15%",sales:"+8% orgánico",per:"9M",salesN:8,guide:"Extremo superior del rango",dd:16,pe:19.6},
+  "Saab":{backlog:"SEK 274.000 millones",bx:"Al 1T",sales:"+21%",per:"1T",salesN:21,guide:"Presenta resultados el 23/10",dd:13,pe:37.7}
+};
+C.forEach(c => { c.f = F[c.name] || null; });
+
+const TOTAL = d3.sum(C, d=>d.cap);
+const nf = (v,d=1) => v.toLocaleString("es-AR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const mm = v => "US$ " + nf(v) + " MM";
+const share = v => nf(v/TOTAL*100) + "%";
+
+// Hechos
+const usShare = d3.sum(C.filter(c=>c.reg==="na"),d=>d.cap)/TOTAL*100;
+document.getElementById("facts").innerHTML = `
+  <div class="fact"><div class="n">US$ ${nf(TOTAL/1000,2)} billones</div><div class="t">valor conjunto de las ${C.length} empresas del gráfico</div></div>
+  <div class="fact"><div class="n">${nf(usShare,0)}%</div><div class="t">corresponde a compañías de Estados Unidos</div></div>
+  <div class="fact"><div class="n">−50%</div><div class="t">caída de Rheinmetall desde máximos, la mayor de las ocho con ficha</div></div>
+  <div class="fact"><div class="n">37,7x</div><div class="t">P/E forward de Saab, la valuación más exigente del grupo</div></div>`;
+
+// Árbol región → país → empresa
+const root0 = {name:"root", children: ["na","eu","as"].map(r => ({
+  name:r, children: d3.groups(C.filter(c=>c.reg===r), d=>d.country).map(([country, items]) => ({name:country, children:items}))
+}))};
+
+const tm = document.getElementById("tm");
+const card = document.getElementById("card");
+const wrap = document.getElementById("tmwrap");
+let active = null, onlyFeat = false;
+
+function shade(c){
+  // tono por región; el país define la variante para separar grupos vecinos
+  const countries = [...new Set(C.filter(x=>x.reg===c.reg).map(x=>x.country))];
+  const n = c.reg==="eu" ? 4 : 3;
+  return `var(--${c.reg}${(countries.indexOf(c.country)%n)+1})`;
+}
+
+function layout(){
+  const W = tm.clientWidth;
+  const H = W >= 760 ? Math.round(W*0.6) : Math.round(W*1.55);
+  tm.style.height = H + "px";
+  const root = d3.hierarchy(root0).sum(d => d.cap || 0).sort((a,b)=>b.value-a.value);
+  d3.treemap().size([W,H]).tile(d3.treemapSquarify.ratio(1.15)).paddingOuter(0).paddingInner(0)(root);
+  const leaves = root.leaves();
+  const sel = d3.select(tm).selectAll(".cell").data(leaves, d=>d.data.name);
+  const ent = sel.enter().append("div").attr("class", d => "cell" + (d.data.f ? " feat" : ""))
+    .attr("tabindex", 0).attr("data-n", d=>d.data.name)
+    .attr("aria-label", d => `${d.data.name}, ${d.data.country}, ${mm(d.data.cap)}`);
+  const all = ent.merge(sel);
+  all.style("left", d=>d.x0+"px").style("top", d=>d.y0+"px")
+     .style("width", d=>(d.x1-d.x0)+"px").style("height", d=>(d.y1-d.y0)+"px")
+     .style("background", d => shade(d.data))
+     .each(function(d){
+        const w = d.x1-d.x0, h = d.y1-d.y0, a = w*h;
+        const fs = Math.max(11, Math.min(46, Math.sqrt(a)/6.2, w/5.2));
+        this.style.fontSize = fs + "px";
+        const showName = w > 64 && h > fs*2.4;
+        const showVal = w > 38 && h > 24;
+        const showCt = w > 150 && h > 90;
+        const showTag = d.data.f && w > 74 && h > fs*2.4 + 26;
+        const firstOfCountry = C.find(c=>c.country===d.data.country) === d.data;
+        this.innerHTML = (showVal ? `<div class="v">${nf(d.data.cap)}</div>` : "")
+          + (showName ? `<div class="nm">${d.data.name}</div>` : "")
+          + (showCt && firstOfCountry ? `<div class="ct">${d.data.country}</div>` : "")
+          + (showTag ? `<span class="tag">Ficha</span>` : (d.data.f && !showTag && w>18 && h>18 ? `<span style="position:absolute;right:5px;bottom:3px;color:#ffb38a;font-size:11px">●</span>` : ""));
+        this.title = "";
+     });
+  all.on("pointerenter", (e,d) => open(d.data.name, e))
+     .on("pointermove", (e,d) => place(e.clientX, e.clientY))
+     .on("pointerleave", () => close())
+     .on("focus", function(e,d){ const b=this.getBoundingClientRect(); open(d.data.name); place(b.left+b.width/2, b.top+b.height/2); })
+     .on("blur", () => close())
+     .on("click", (e,d) => { open(d.data.name); place(e.clientX, e.clientY); });
+}
+
+function cardHtml(c){
+  const head = `<div class="hd"><div class="co">${c.name}</div><div class="cc">${c.country}</div></div>
+    <div class="mc"><span>Valor de mercado</span><b>${mm(c.cap)}</b></div>`;
+  if (!c.f) return head + `<div class="foot2">${share(c.cap)} del total del gráfico · ${REGNAME[c.reg]}</div>`;
+  const f = c.f;
+  return head + `<dl>
+    <dt>Cartera</dt><dd>${f.backlog}<br><span style="color:var(--muted);font-size:12px">${f.bx}</span></dd>
+    <dt>Ventas</dt><dd><span class="up">${f.sales}</span> <span style="color:var(--muted)">(${f.per})</span></dd>
+    <dt>Guía 2026</dt><dd>${f.guide}</dd>
+    <dt>Desde máx.</dt><dd><div class="dd-bar"><b>−${f.dd}%</b><div class="t"><span style="width:${f.dd*2}%"></span></div></div></dd>
+    <dt>P/E fwd</dt><dd><b>${nf(f.pe, f.pe%1?1:0)}x</b></dd>
+  </dl>`;
+}
+function open(name){
+  active = name;
+  const c = C.find(x=>x.name===name);
+  card.innerHTML = cardHtml(c); card.classList.add("show");
+  d3.select(tm).selectAll(".cell").classed("on", d => d.data.name===name);
+}
+function place(cx, cy){
+  const b = wrap.getBoundingClientRect(), cw = card.offsetWidth, ch = card.offsetHeight;
+  let x = cx - b.left + 16, y = cy - b.top + 16;
+  if (x + cw > b.width - 8) x = cx - b.left - cw - 16;
+  if (x < 8) x = Math.max(8, (b.width - cw)/2);
+  if (y + ch > b.height - 8) y = cy - b.top - ch - 16;
+  card.style.left = x+"px"; card.style.top = Math.max(8,y)+"px";
+}
+function close(){ active = null; card.classList.remove("show");
+  d3.select(tm).selectAll(".cell").classed("on", false); }
+document.addEventListener("pointerdown", e => { if (!e.target.closest(".cell")) close(); });
+
+// Filtro
+const fAll = document.getElementById("fAll"), fFeat = document.getElementById("fFeat");
+function setFilter(v){ onlyFeat = v; tm.classList.toggle("dim", v); fAll.setAttribute("aria-pressed", !v); fFeat.setAttribute("aria-pressed", v); }
+fAll.onclick = () => setFilter(false); fFeat.onclick = () => setFilter(true);
+
+layout();
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(layout, 120); });
+</script>
