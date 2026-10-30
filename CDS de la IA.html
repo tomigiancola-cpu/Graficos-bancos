@@ -1,0 +1,223 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CDS de la IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,600;6..72,700&family=Libre+Franklin:wght@400;500;600&display=swap">
+<style>
+/* Layout: gráfico de nota periodística, una columna; titular, controles, gráfico, tabla de cierre, fuente */
+:root{
+  --bg:#ffffff; --fg:#16181d; --muted:#5d6370; --rule:#e3e5ea; --grid:#eceef2; --panel:#f5f6f8;
+  --oracle:#e0409a; --spacex:#c0182b; --broadcom:#14b3c7; --meta:#16181d; --nvidia:#21b45a;
+  --amd:#2b8fd6; --alphabet:#a77be6; --amazon:#f0922b; --microsoft:#2a48d6;
+  --display:"Newsreader", Georgia, "Times New Roman", serif;
+  --ui:"Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121419; --fg:#eceef2; --muted:#9aa0ad; --rule:#2a2e37; --grid:#22262e; --panel:#1a1d23;
+  --oracle:#f05aae; --spacex:#ef4a5a; --broadcom:#3cc9da; --meta:#e8e9ec; --nvidia:#3ccb72;
+  --amd:#4fa6e6; --alphabet:#b993f0; --amazon:#f5a54d; --microsoft:#6d84f0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121419; --fg:#eceef2; --muted:#9aa0ad; --rule:#2a2e37; --grid:#22262e; --panel:#1a1d23;
+  --oracle:#f05aae; --spacex:#ef4a5a; --broadcom:#3cc9da; --meta:#e8e9ec; --nvidia:#3ccb72;
+  --amd:#4fa6e6; --alphabet:#b993f0; --amazon:#f5a54d; --microsoft:#6d84f0; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--ui);}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:18px}
+.kicker{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--oracle)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,4.4vw,38px);line-height:1.1;margin:6px 0 8px;text-wrap:balance}
+.dek{margin:0;color:var(--muted);font-size:15px;line-height:1.5;max-width:62ch}
+.controls{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--rule);background:var(--bg);color:var(--fg);
+  font:500 13px var(--ui);padding:5px 10px 5px 8px;border-radius:999px;cursor:pointer}
+.chip .sw{width:14px;height:3px;border-radius:2px;background:var(--c)}
+.chip[aria-pressed="false"]{color:var(--muted);opacity:.55}
+.chip[aria-pressed="false"] .sw{background:var(--rule)}
+.chip:focus-visible,.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.seg button{font:500 13px var(--ui);color:var(--muted);background:var(--bg);border:0;padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.chartbox{position:relative;width:100%}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.axis text{fill:var(--muted);font:12px var(--ui);font-variant-numeric:tabular-nums}
+.gridline{stroke:var(--grid);stroke-width:1}
+.zero{stroke:var(--rule)}
+.line{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round;transition:opacity .15s}
+.dim .line{opacity:.18}
+.dim .line.hl{opacity:1;stroke-width:3}
+.endlab{font:600 11.5px var(--ui);font-variant-numeric:tabular-nums}
+.cross{stroke:var(--muted);stroke-dasharray:3 3}
+.tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--rule);border-radius:8px;
+  box-shadow:0 6px 20px rgba(0,0,0,.12);padding:9px 11px;font-size:12.5px;min-width:170px;z-index:2}
+.tip h4{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--muted)}
+.tip .row{display:flex;align-items:center;gap:8px;justify-content:space-between;line-height:1.55}
+.tip .row span:first-child{display:flex;align-items:center;gap:6px}
+.tip i{display:inline-block;width:10px;height:3px;border-radius:2px}
+.tip b{font-variant-numeric:tabular-nums;font-weight:600}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--rule);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td .nm{display:inline-flex;align-items:center;gap:8px;font-weight:500}
+td .nm i{width:12px;height:3px;border-radius:2px;display:inline-block}
+.up{color:var(--spacex)}
+.foot{font-size:12px;color:var(--muted);line-height:1.5;border-top:1px solid var(--rule);padding-top:10px}
+.unit{font-size:12px;color:var(--muted);margin:0 0 -8px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">Mercados · Inteligencia artificial</div>
+    <h1>El riesgo crediticio de la IA toca nuevos máximos</h1>
+    <p class="dek">Swaps de incumplimiento crediticio (CDS) a cinco años de los <em>hyperscalers</em> y fabricantes de chips. Oracle y SpaceX encabezan la suba: el mercado cobra cada vez más caro el seguro contra un default de las empresas que más se endeudan para construir centros de datos.</p>
+  </header>
+
+  <div class="controls">
+    <div class="legend" id="legend" aria-label="Series"></div>
+    <div class="seg" id="range" aria-label="Período">
+      <button type="button" id="r-all" data-m="0" aria-pressed="true">Todo</button>
+      <button type="button" id="r-6" data-m="6" aria-pressed="false">6 meses</button>
+      <button type="button" id="r-3" data-m="3" aria-pressed="false">3 meses</button>
+    </div>
+  </div>
+
+  <p class="unit">Puntos básicos</p>
+  <div class="chartbox" id="box">
+    <svg id="chart" role="img" aria-label="Gráfico de líneas de CDS a 5 años, agosto 2025 a octubre 2026"></svg>
+    <div class="tip" id="tip" hidden></div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Empresa</th><th>Último</th><th>Hace 3 meses</th><th>Var. 3M</th><th>Máximo</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <p class="foot">Fuente: Bloomberg. Valores aproximados, reconstruidos a partir del gráfico original; sirven para ilustrar la tendencia y no como cotización exacta. Un CDS de 100 pb implica pagar 1% anual del monto asegurado para cubrirse ante un default.</p>
+</div>
+
+<script>
+(function(){
+const SERIES=[
+ {k:"oracle",n:"Oracle",a:[["2025-08-01",36],["2025-09-10",40],["2025-10-05",50],["2025-11-05",100],["2025-12-10",152],["2026-01-15",158],["2026-02-03",150],["2026-02-06",128],["2026-02-12",150],["2026-03-15",162],["2026-04-25",200],["2026-05-20",172],["2026-06-15",155],["2026-07-10",175],["2026-07-28",196],["2026-08-15",210],["2026-09-10",195],["2026-09-26",178],["2026-10-05",210],["2026-10-15",262],["2026-10-22",327],["2026-10-30",296]]},
+ {k:"spacex",n:"SpaceX",a:[["2026-06-25",110],["2026-07-06",150],["2026-07-28",186],["2026-08-15",174],["2026-09-10",168],["2026-09-26",152],["2026-10-08",205],["2026-10-22",266],["2026-10-30",248]]},
+ {k:"broadcom",n:"Broadcom",a:[["2025-08-01",34],["2025-12-10",44],["2026-04-20",60],["2026-06-15",58],["2026-07-15",76],["2026-08-01",96],["2026-08-15",86],["2026-09-05",124],["2026-09-22",118],["2026-10-03",132],["2026-10-22",176],["2026-10-30",162]]},
+ {k:"meta",n:"Meta",a:[["2025-11-15",58],["2026-01-15",55],["2026-04-15",60],["2026-06-15",66],["2026-07-05",70],["2026-07-25",98],["2026-08-10",86],["2026-09-10",98],["2026-09-26",90],["2026-10-10",110],["2026-10-22",128],["2026-10-30",115]]},
+ {k:"nvidia",n:"Nvidia",a:[["2025-08-01",28],["2025-12-10",42],["2026-04-15",55],["2026-06-15",52],["2026-07-25",80],["2026-08-15",70],["2026-09-15",85],["2026-10-01",84],["2026-10-22",128],["2026-10-30",120]]},
+ {k:"amd",n:"AMD",a:[["2025-08-01",24],["2025-12-10",38],["2026-04-15",52],["2026-06-15",50],["2026-07-25",72],["2026-08-15",65],["2026-09-15",78],["2026-10-01",80],["2026-10-22",114],["2026-10-30",107]]},
+ {k:"alphabet",n:"Alphabet",a:[["2025-08-01",22],["2025-12-10",38],["2026-04-15",56],["2026-06-15",54],["2026-07-25",70],["2026-09-15",77],["2026-10-01",80],["2026-10-22",118],["2026-10-30",110]]},
+ {k:"amazon",n:"Amazon",a:[["2025-08-01",25],["2025-12-10",40],["2026-04-15",54],["2026-06-15",52],["2026-07-25",62],["2026-09-15",68],["2026-10-01",72],["2026-10-22",95],["2026-10-30",88]]},
+ {k:"microsoft",n:"Microsoft",a:[["2025-08-01",20],["2025-12-10",30],["2026-04-15",40],["2026-06-15",38],["2026-07-25",52],["2026-09-15",48],["2026-10-01",50],["2026-10-22",62],["2026-10-30",60]]}
+];
+const DAY=864e5, T0=Date.parse("2025-08-01"), T1=Date.parse("2026-10-30");
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+// semilla determinística para el "ruido" de mercado entre anclas
+function rng(s){return()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,((s^s>>>7)>>>0)/4294967296))}
+const dates=[];for(let t=T0;t<=T1;t+=2*DAY)dates.push(t);
+if(dates[dates.length-1]!==T1)dates.push(T1);
+SERIES.forEach((s,i)=>{
+  const an=s.a.map(([d,v])=>[Date.parse(d),v]); const r=rng(17+i*101); let walk=0;
+  s.v=dates.map(t=>{
+    if(t<an[0][0]||t>an[an.length-1][0])return null;
+    let j=0;while(j<an.length-2&&t>an[j+1][0])j++;
+    const [ta,va]=an[j],[tb,vb]=an[j+1]; const f=(t-ta)/(tb-ta||1);
+    const base=va+(vb-va)*f;
+    walk=walk*.6+(r()-.5)*base*.05;
+    const atAnchor=an.some(a=>Math.abs(a[0]-t)<DAY*1.5);
+    return Math.max(5,Math.round(atAnchor?base:base+walk));
+  });
+  s.on=true;
+});
+
+const svg=document.getElementById("chart"),tip=document.getElementById("tip"),box=document.getElementById("box");
+const NS="http://www.w3.org/2000/svg";let range=0,hl=null;
+const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
+const css=k=>getComputedStyle(document.documentElement).getPropertyValue("--"+k).trim();
+
+function draw(){
+  const W=box.clientWidth, narrow=W<560, H=narrow?340:420;
+  const m={t:12,r:narrow?44:84,b:30,l:narrow?30:38};
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.innerHTML="";
+  const start=range?Math.max(T0,T1-range*30.5*DAY):T0;
+  const idx=dates.map((t,i)=>t>=start?i:-1).filter(i=>i>=0);
+  const vis=SERIES.filter(s=>s.on);
+  let ymax=0;vis.forEach(s=>idx.forEach(i=>{if(s.v[i]!=null)ymax=Math.max(ymax,s.v[i])}));
+  const step=ymax>250?100:ymax>120?50:25; ymax=Math.max(step,Math.ceil(ymax*1.05/step)*step);
+  const x=t=>m.l+(t-start)/(T1-start)*(W-m.l-m.r), y=v=>H-m.b-v/ymax*(H-m.t-m.b);
+  const g=el("g",{class:"axis"},svg);
+  for(let v=0;v<=ymax;v+=step){el("line",{class:v?"gridline":"gridline zero",x1:m.l,x2:W-m.r,y1:y(v),y2:y(v)},g);
+    el("text",{x:m.l-6,y:y(v)+4,"text-anchor":"end"},g).textContent=v;}
+  // ticks mensuales
+  const d0=new Date(start);let cur=new Date(Date.UTC(d0.getUTCFullYear(),d0.getUTCMonth()+1,1));
+  const every=range?1:(narrow?3:2);let n=0;
+  while(cur.getTime()<=T1){const mo=cur.getUTCMonth();
+    if(n%every===0){const tx=x(cur.getTime());el("line",{x1:tx,x2:tx,y1:H-m.b,y2:H-m.b+4,stroke:css("rule")},g);
+      const lab=el("text",{x:tx,y:H-m.b+18,"text-anchor":"middle"},g);
+      lab.textContent=MES[mo]+((mo===0||n===0)?" "+String(cur.getUTCFullYear()).slice(2):"");}
+    n++;cur=new Date(Date.UTC(cur.getUTCFullYear(),mo+1,1));}
+  const lines=el("g",{class:hl?"dim":""},svg);
+  // etiquetas finales sin superposición
+  const ends=[];
+  vis.slice().reverse().forEach(s=>{
+    let d="",pen=false;idx.forEach(i=>{const v=s.v[i];if(v==null){pen=false;return}
+      d+=(pen?"L":"M")+x(dates[i]).toFixed(1)+","+y(v).toFixed(1);pen=true});
+    if(!d)return;
+    el("path",{d,class:"line"+(hl===s.k?" hl":""),stroke:`var(--${s.k})`},lines);
+    const last=s.v[s.v.length-1];ends.push({s,y:y(last),v:last});
+  });
+  ends.sort((a,b)=>a.y-b.y);const gap=13;
+  for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<gap)ends[i].y=ends[i-1].y+gap;
+  ends.forEach(e=>{const t=el("text",{x:W-m.r+6,y:e.y+4,class:"endlab",fill:`var(--${e.s.k})`},svg);
+    t.textContent=narrow?e.v:`${e.s.n} ${e.v}`;
+    if(hl&&hl!==e.s.k)t.setAttribute("opacity",".3");});
+  const cross=el("line",{class:"cross",y1:m.t,y2:H-m.b,visibility:"hidden"},svg);
+  const dots=el("g",{},svg);
+  const hit=el("rect",{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:"transparent"},svg);
+  function move(cx){
+    const r=svg.getBoundingClientRect(),px=(cx-r.left)*W/r.width;
+    let best=idx[0],bd=1e9;idx.forEach(i=>{const d=Math.abs(x(dates[i])-px);if(d<bd){bd=d;best=i}});
+    const tx=x(dates[best]);cross.setAttribute("x1",tx);cross.setAttribute("x2",tx);cross.setAttribute("visibility","visible");
+    dots.innerHTML="";
+    const rows=vis.filter(s=>s.v[best]!=null).sort((a,b)=>b.v[best]-a.v[best]);
+    rows.forEach(s=>el("circle",{cx:tx,cy:y(s.v[best]),r:3.5,fill:`var(--${s.k})`,stroke:css("bg"),"stroke-width":1.5},dots));
+    const dt=new Date(dates[best]);
+    tip.innerHTML=`<h4>${dt.getUTCDate()} ${MES[dt.getUTCMonth()]} ${dt.getUTCFullYear()}</h4>`+
+      rows.map(s=>`<div class="row"><span><i style="background:var(--${s.k})"></i>${s.n}</span><b>${s.v[best]} pb</b></div>`).join("");
+    tip.hidden=false;
+    const sx=tx*r.width/W, tw=tip.offsetWidth;
+    tip.style.left=(sx+14+tw>r.width?sx-14-tw:sx+14)+"px";tip.style.top="8px";
+  }
+  hit.addEventListener("pointermove",e=>move(e.clientX));
+  hit.addEventListener("pointerdown",e=>move(e.clientX));
+  hit.addEventListener("pointerleave",()=>{tip.hidden=true;cross.setAttribute("visibility","hidden");dots.innerHTML=""});
+}
+
+// leyenda
+const lg=document.getElementById("legend");
+SERIES.forEach(s=>{const b=document.createElement("button");b.type="button";b.className="chip";b.id="s-"+s.k;
+  b.style.setProperty("--c",`var(--${s.k})`);b.setAttribute("aria-pressed","true");
+  b.innerHTML=`<span class="sw"></span>${s.n}`;
+  b.onclick=()=>{s.on=!s.on;if(!SERIES.some(x=>x.on))s.on=true;b.setAttribute("aria-pressed",s.on);if(!s.on&&hl===s.k)hl=null;draw()};
+  b.onmouseenter=()=>{if(s.on){hl=s.k;draw()}};b.onmouseleave=()=>{hl=null;draw()};
+  b.onfocus=b.onmouseenter;b.onblur=b.onmouseleave;
+  lg.appendChild(b)});
+document.querySelectorAll("#range button").forEach(b=>b.onclick=()=>{range=+b.dataset.m;
+  document.querySelectorAll("#range button").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()});
+
+// tabla
+const back=dates.findIndex(t=>t>=T1-91*DAY);
+document.getElementById("tbody").innerHTML=SERIES.slice().sort((a,b)=>b.v.at(-1)-a.v.at(-1)).map(s=>{
+  const last=s.v.at(-1),prev=s.v[back],mx=Math.max(...s.v.filter(v=>v!=null));
+  const ch=prev!=null?Math.round((last/prev-1)*100):null;
+  return `<tr><td><span class="nm"><i style="background:var(--${s.k})"></i>${s.n}</span></td><td>${last} pb</td><td>${prev??"—"}${prev!=null?" pb":""}</td><td class="${ch>0?"up":""}">${ch==null?"—":(ch>0?"+":"")+ch+"%"}</td><td>${mx} pb</td></tr>`}).join("");
+
+draw();let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,80)});
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",draw);
+})();
+</script>
+
+</body></html>

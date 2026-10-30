@@ -1,0 +1,196 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>La rueda del dinero de la IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: encabezado editorial, filtros, red de nodos + panel de acuerdos (apilan en móvil) */
+:root{
+  --bg:#f4f5f3; --surface:#ffffff; --node:#e6e9e7; --ink:#18201f; --muted:#5f6b68; --rule:#d5dbd8;
+  --inv:#0f7f86; --hw:#c0398a; --svc:#3d5fc4; --hot:#d9781e;
+  --display:"Newsreader",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111514; --surface:#1a1f1e; --node:#252c2a; --ink:#e7ecea; --muted:#98a4a1; --rule:#2e3735;
+  --inv:#43c4c9; --hw:#ec6fb8; --svc:#8aa2ff; --hot:#f0a04f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111514; --surface:#1a1f1e; --node:#252c2a; --ink:#e7ecea; --muted:#98a4a1; --rule:#2e3735;
+  --inv:#43c4c9; --hw:#ec6fb8; --svc:#8aa2ff; --hot:#f0a04f; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 40px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:20px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:650;font-size:clamp(28px,4.4vw,44px);line-height:1.08;margin:6px 0 10px;text-wrap:balance;max-width:20ch}
+.dek{color:var(--muted);max-width:64ch;margin:0}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;font:500 13px var(--body);color:var(--ink);background:var(--surface);
+  border:1px solid var(--rule);border-radius:999px;padding:6px 13px;cursor:pointer}
+.chip[aria-pressed="false"]{opacity:.4}
+.chip:focus-visible,.deal:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ln{width:18px;height:3px;border-radius:2px}
+.main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.chart{min-width:0}
+svg{width:100%;height:auto;display:block}
+.edge{fill:none;stroke-width:2;transition:opacity .2s,stroke-width .2s}
+.nd{cursor:pointer}
+.nd circle{fill:var(--node);stroke:var(--rule);stroke-width:1.5;transition:stroke .2s}
+.nd text{font:600 13px var(--body);fill:var(--ink);text-anchor:middle;pointer-events:none}
+.nd .sub{font:400 10.5px var(--mono);fill:var(--muted)}
+.nd.sel circle{stroke:var(--ink);stroke-width:2.5}
+.nd.dim{opacity:.3}
+.panel{min-width:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:20px;display:grid;gap:12px}
+.panel h2{font-family:var(--display);font-weight:650;font-size:24px;margin:0;line-height:1.15}
+.panel p{margin:0;color:var(--muted);font-size:14px}
+.deals{display:grid;gap:8px;max-height:430px;overflow:auto}
+.deal{display:grid;grid-template-columns:4px 1fr;gap:10px;text-align:left;background:transparent;border:1px solid var(--rule);border-radius:4px;padding:9px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.deal .bar{border-radius:2px}
+.deal b{font-size:13.5px;font-weight:600}
+.deal small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4;margin-top:2px}
+.deal .amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--ink)}
+.quote{border-left:3px solid var(--hot);padding-left:12px;font-size:14px}
+.quote span{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.btn-reset{justify-self:start;font:500 12.5px var(--body);background:transparent;border:1px solid var(--rule);color:var(--ink);border-radius:4px;padding:5px 10px;cursor:pointer}
+.foot{font-size:12.5px;color:var(--muted);max-width:85ch;border-top:1px solid var(--rule);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">Mercados · Inteligencia artificial</div>
+    <h1>Financiamiento circular: quién le paga a quién en la IA</h1>
+    <p class="dek">Los fabricantes de chips invierten en sus clientes, que usan ese capital para comprarles chips o contratar nube. Tocá una compañía para ver sus acuerdos, o un acuerdo para resaltarlo en la red.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Tipos de flujo">
+    <button class="chip" data-t="inv" aria-pressed="true"><span class="ln" style="background:var(--inv)"></span>Inversión de capital</button>
+    <button class="chip" data-t="hw" aria-pressed="true"><span class="ln" style="background:var(--hw)"></span>Compra de chips y equipos</button>
+    <button class="chip" data-t="svc" aria-pressed="true"><span class="ln" style="background:var(--svc)"></span>Contratos de nube</button>
+  </div>
+
+  <div class="main">
+    <div class="chart"><svg id="net" viewBox="0 0 640 600" role="img" aria-label="Red de acuerdos entre compañías de IA"></svg></div>
+    <aside class="panel" aria-live="polite">
+      <div class="kicker" id="p-k">Vista general</div>
+      <h2 id="p-t">El circuito completo</h2>
+      <p id="p-d"></p>
+      <div class="deals" id="deals"></div>
+      <button class="btn-reset" id="reset" hidden>Ver toda la red</button>
+    </aside>
+  </div>
+
+  <p class="foot">Selección de acuerdos públicos anunciados entre 2025 y octubre de 2026; montos según lo informado por las compañías y la prensa, no exhaustiva. El tamaño de cada círculo refleja la cantidad de vínculos dentro de esta red, no su valor de mercado.</p>
+</div>
+
+<script>
+const NODES={
+ nvidia:{n:"Nvidia",s:"Chips",x:320,y:300},
+ openai:{n:"OpenAI",s:"Modelos",x:175,y:140},
+ meta:{n:"Meta",s:"Plataformas",x:500,y:165},
+ microsoft:{n:"Microsoft",s:"Nube",x:330,y:68},
+ amd:{n:"AMD",s:"Chips",x:110,y:345},
+ oracle:{n:"Oracle",s:"Nube",x:200,y:510},
+ coreweave:{n:"CoreWeave",s:"Neocloud",x:530,y:395},
+ nebius:{n:"Nebius",s:"Neocloud",x:395,y:520},
+ mistral:{n:"Mistral",s:"Modelos",x:575,y:270}
+};
+// t: inv | hw | svc
+const EDGES=[
+ {f:"nvidia",to:"meta",t:"inv",a:"US$3.000M",d:"Nvidia participa en la ampliación de capital de Meta para su infraestructura de IA.",w:"Oct 2026",hot:1},
+ {f:"meta",to:"nvidia",t:"hw",a:"Millones de GPU",d:"Acuerdo plurianual: Meta despliega chips, CPU y redes de Nvidia en sus centros de datos.",w:"Feb–oct 2026",hot:1},
+ {f:"amd",to:"meta",t:"inv",a:"US$1.000M",d:"AMD también invierte en la ampliación de capital de Meta.",w:"Oct 2026"},
+ {f:"meta",to:"amd",t:"hw",a:"Equipos Helios y EPYC",d:"Meta usa racks y procesadores de AMD para su modelo Muse.",w:"2026"},
+ {f:"nvidia",to:"openai",t:"inv",a:"US$30.000M",d:"La mayor inversión de capital de Nvidia en 2026, atada a compromisos de cómputo.",w:"Feb 2026"},
+ {f:"openai",to:"nvidia",t:"hw",a:"Compromisos de cómputo",d:"OpenAI compra sistemas de Nvidia para sus centros de datos.",w:"2025–2026"},
+ {f:"openai",to:"amd",t:"hw",a:"6 GW de GPU",d:"OpenAI se compromete a desplegar chips de AMD.",w:"Oct 2025"},
+ {f:"amd",to:"openai",t:"inv",a:"Hasta 160M acciones",d:"AMD le otorga a OpenAI una opción para comprar sus propias acciones.",w:"Oct 2025"},
+ {f:"openai",to:"oracle",t:"svc",a:"~US$300.000M",d:"Contrato de nube a varios años con Oracle.",w:"2025"},
+ {f:"oracle",to:"nvidia",t:"hw",a:"Decenas de miles de millones",d:"Oracle compra chips de Nvidia para cumplir sus contratos de nube.",w:"2025–2026"},
+ {f:"microsoft",to:"openai",t:"inv",a:"Participación accionaria",d:"Microsoft es uno de los principales accionistas de OpenAI.",w:"Desde 2019"},
+ {f:"openai",to:"microsoft",t:"svc",a:"Nube Azure",d:"OpenAI contrata capacidad de cómputo en Azure.",w:"2025"},
+ {f:"microsoft",to:"nebius",t:"svc",a:"~US$17.400M",d:"Contrato de capacidad de GPU con Nebius.",w:"Sep 2025"},
+ {f:"nvidia",to:"nebius",t:"inv",a:"US$2.000M",d:"Inversión con compromiso de despliegue de 5 GW.",w:"Mar 2026"},
+ {f:"nebius",to:"nvidia",t:"hw",a:"Compra de GPU",d:"Nebius construye su nube sobre chips de Nvidia.",w:"2025–2026"},
+ {f:"nvidia",to:"coreweave",t:"inv",a:"US$2.000M+",d:"Inversión inicial en enero con ampliaciones posteriores.",w:"Ene 2026"},
+ {f:"coreweave",to:"nvidia",t:"hw",a:"Compra de GPU",d:"CoreWeave es uno de los mayores compradores de chips de Nvidia.",w:"2025–2026"},
+ {f:"openai",to:"coreweave",t:"svc",a:"Contratos de cómputo",d:"OpenAI alquila capacidad de GPU a CoreWeave.",w:"2025"},
+ {f:"nvidia",to:"mistral",t:"inv",a:"Ronda privada",d:"Nvidia participa en rondas de financiamiento de Mistral.",w:"2025–2026"}
+];
+const COL={inv:"var(--inv)",hw:"var(--hw)",svc:"var(--svc)"},TYPE={inv:"Inversión",hw:"Chips y equipos",svc:"Nube"};
+const NS="http://www.w3.org/2000/svg",svg=document.getElementById("net");
+const mk=(t,a,p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+const deg={};EDGES.forEach(e=>{deg[e.f]=(deg[e.f]||0)+1;deg[e.to]=(deg[e.to]||0)+1});
+for(const k in NODES)NODES[k].r=24+deg[k]*3.2;
+
+const defs=mk("defs",{});
+["inv","hw","svc"].forEach(t=>{const m=mk("marker",{id:"ar-"+t,viewBox:"0 0 10 10",refX:9,refY:5,markerWidth:6,markerHeight:6,orient:"auto-start-reverse"},defs);
+  mk("path",{d:"M0,0 L10,5 L0,10 z",fill:COL[t]},m)});
+
+const gE=mk("g",{}),gN=mk("g",{});
+EDGES.forEach((e,i)=>{
+  const A=NODES[e.f],B=NODES[e.to],dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+  const sx=A.x+ux*A.r,sy=A.y+uy*A.r,ex=B.x-ux*(B.r+3),ey=B.y-uy*(B.r+3);
+  const bend=34,mx=(sx+ex)/2-uy*bend,my=(sy+ey)/2+ux*bend; // curva siempre a la izquierda del sentido: ida y vuelta no se pisan
+  e.el=mk("path",{d:`M${sx},${sy} Q${mx},${my} ${ex},${ey}`,class:"edge",stroke:COL[e.t],"marker-end":`url(#ar-${e.t})`},gE);
+  e.el.style.cursor="pointer";e.el.addEventListener("click",()=>focusEdge(i));
+});
+for(const k in NODES){const N=NODES[k];
+  const g=mk("g",{class:"nd",tabindex:0,role:"button","aria-label":N.n},gN);N.g=g;
+  mk("circle",{cx:N.x,cy:N.y,r:N.r},g);
+  mk("text",{x:N.x,y:N.y-2},g).textContent=N.n;
+  mk("text",{x:N.x,y:N.y+13,class:"sub"},g).textContent=N.s;
+  g.addEventListener("click",()=>selectNode(k));
+  g.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectNode(k)}});
+}
+
+let on={inv:true,hw:true,svc:true},cur=null,curEdge=null;
+const $=id=>document.getElementById(id);
+function visible(e){return on[e.t]}
+function render(){
+  const list=EDGES.map((e,i)=>({e,i})).filter(({e})=>visible(e)&&(!cur||e.f===cur||e.to===cur));
+  EDGES.forEach((e,i)=>{
+    const show=visible(e),rel=!cur||e.f===cur||e.to===cur,isE=curEdge===i;
+    e.el.style.display=show?"":"none";
+    e.el.style.opacity=curEdge!=null?(isE?1:.12):(rel?(cur?1:.75):.1);
+    e.el.style.strokeWidth=isE?4:(cur&&rel?2.8:2);
+  });
+  const linked=new Set();if(cur){linked.add(cur);list.forEach(({e})=>{linked.add(e.f);linked.add(e.to)})}
+  if(curEdge!=null){linked.clear();linked.add(EDGES[curEdge].f);linked.add(EDGES[curEdge].to)}
+  for(const k in NODES){NODES[k].g.classList.toggle("sel",k===cur);NODES[k].g.classList.toggle("dim",linked.size>0&&!linked.has(k))}
+  const box=$("deals");box.innerHTML="";
+  list.forEach(({e,i})=>{
+    const b=document.createElement("button");b.className="deal";b.id="deal-"+i;
+    b.style.borderColor=curEdge===i?"var(--ink)":"";
+    b.innerHTML=`<span class="bar" style="background:${COL[e.t]}"></span><span><b>${NODES[e.f].n} → ${NODES[e.to].n}</b> <span class="amt">${e.a}</span><small>${TYPE[e.t]} · ${e.w}. ${e.d}</small></span>`;
+    b.onclick=()=>focusEdge(i);box.appendChild(b);
+  });
+  $("reset").hidden=!cur&&curEdge==null;
+}
+function selectNode(k){
+  cur=cur===k?null:k;curEdge=null;
+  if(cur){const n=EDGES.filter(e=>visible(e)&&(e.f===k||e.to===k));
+    const out=n.filter(e=>e.f===k).length,inn=n.length-out;
+    $("p-k").textContent=NODES[k].s;$("p-t").textContent=NODES[k].n;
+    $("p-d").textContent=`${n.length} vínculos en esta red: ${out} salientes y ${inn} entrantes.`+(k==="meta"?" Gutiérrez advierte que estos compromisos podrían sumar presión bajista sobre la acción.":k==="nvidia"?" Invierte en clientes que luego le compran chips: el núcleo del circuito.":"");
+  } else overview();
+  render();
+}
+function focusEdge(i){
+  curEdge=curEdge===i?null:i;
+  if(curEdge!=null){const e=EDGES[i];$("p-k").textContent=TYPE[e.t]+" · "+e.w;$("p-t").textContent=`${NODES[e.f].n} → ${NODES[e.to].n}`;$("p-d").textContent=e.d+" Monto: "+e.a+"."}
+  else if(cur)return selectNode(cur),selectNode(cur);
+  else overview();
+  render();
+}
+function overview(){
+  $("p-k").textContent="Vista general";$("p-t").textContent="El circuito completo";
+  $("p-d").textContent="Nvidia está en el centro: invierte en OpenAI, Meta, CoreWeave y Nebius, que a su vez le compran chips. El caso Nvidia–Meta, resaltado en la nota, es el más reciente.";
+}
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{const t=b.dataset.t;
+  if(on[t]&&Object.values(on).filter(Boolean).length===1)return;
+  on[t]=!on[t];b.setAttribute("aria-pressed",on[t]);
+  if(curEdge!=null&&!on[EDGES[curEdge].t])curEdge=null;render()});
+$("reset").onclick=()=>{cur=null;curEdge=null;overview();render()};
+overview();selectNode("meta");
+</script>
+
+</body></html>
