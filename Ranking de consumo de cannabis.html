@@ -1,0 +1,190 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ranking de consumo de cannabis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: columna editorial; ranking de barras horizontales coloreadas por estado legal (misma paleta que el mapa); ficha por país al pasar o tocar */
+:root{
+  --bg:#F3F5F1; --surface:#FFFFFF; --ink:#16231C; --muted:#5C6A62; --rule:#D5DCD5; --track:#E6EBE6;
+  --legal:#1E7A4C; --parcial:#7DBB8F; --despen:#E1A93D; --laxo:#E9A08E; --ilegal:#B3473C;
+  --accent:#1E7A4C;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1713; --surface:#16211B; --ink:#E7EDE8; --muted:#97A69D; --rule:#2A3830; --track:#1B2720;
+  --legal:#3FAE72; --parcial:#8FCBA0; --despen:#E6B14C; --laxo:#D98C7A; --ilegal:#C2564A;
+  --accent:#4CC283; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1713; --surface:#16211B; --ink:#E7EDE8; --muted:#97A69D; --rule:#2A3830; --track:#1B2720;
+  --legal:#3FAE72; --parcial:#8FCBA0; --despen:#E6B14C; --laxo:#D98C7A; --ilegal:#C2564A;
+  --accent:#4CC283; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.kicker{font-family:var(--f-data);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:flex;gap:10px;flex-wrap:wrap}
+.kicker span+span::before{content:"/";margin-right:10px;color:var(--muted)}
+h1{font-family:var(--f-display);font-stretch:72%;font-weight:850;font-size:clamp(38px,6.4vw,72px);line-height:.94;letter-spacing:-.01em;margin:14px 0 14px;text-wrap:balance;max-width:15ch}
+h1 em{font-style:normal;color:var(--accent)}
+.dek{font-size:clamp(18px,2vw,21px);color:var(--muted);max-width:62ch;margin:0}
+.dek strong{color:var(--ink);font-weight:500}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:26px 0 4px;padding:0;list-style:none;font-family:var(--f-display);font-stretch:90%;font-size:14px;font-weight:600}
+.legend li{display:flex;align-items:center;gap:7px}
+.legend i{width:12px;height:12px;border-radius:3px;display:block}
+.legend .lab{font-family:var(--f-data);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hint{font-family:var(--f-data);font-size:12px;color:var(--muted);margin:6px 0 14px}
+
+.chart{position:relative;border-top:2px solid var(--ink)}
+.axis{display:grid;grid-template-columns:var(--lab) 1fr 64px;gap:14px;font-family:var(--f-data);font-size:11px;color:var(--muted);padding:8px 0 4px}
+.axis .ticks{position:relative;height:14px}
+.axis .ticks span{position:absolute;transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.chart{--lab:190px}
+@media (max-width:620px){.chart{--lab:120px}.axis .ticks .odd{display:none}}
+.row{display:grid;grid-template-columns:var(--lab) 1fr 64px;gap:14px;align-items:center;width:100%;padding:9px 0;border:0;border-bottom:1px solid var(--rule);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.row:hover .bar,.row[aria-expanded="true"] .bar{filter:brightness(1.07)}
+.row:hover .name,.row[aria-expanded="true"] .name{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.name{display:flex;align-items:baseline;gap:10px;min-width:0;font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:18px;line-height:1.1}
+.name .pos{font-family:var(--f-data);font-size:12px;font-weight:600;color:var(--muted);width:20px;flex:none;font-variant-numeric:tabular-nums}
+.name .nm{min-width:0;overflow-wrap:anywhere}
+.yr{display:block;font-family:var(--f-data);font-size:11px;font-weight:400;font-stretch:100%;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+.yr.old{display:table;color:var(--ilegal);font-weight:600;border:1px solid currentColor;border-radius:3px;padding:0 5px;text-transform:uppercase;letter-spacing:.06em}
+.track{position:relative;height:24px;background:linear-gradient(to right,var(--rule) 1px,transparent 1px) 0 0/calc(100% / 6) 100%,var(--track);border-radius:2px}
+.bar{position:absolute;inset:0 auto 0 0;border-radius:2px;transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both}
+.bar.est{background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(255,255,255,.28) 5px 8px)!important}
+@keyframes grow{from{transform:scaleX(.02)}to{transform:scaleX(1)}}
+.val{font-family:var(--f-display);font-stretch:75%;font-weight:850;font-size:22px;text-align:right;font-variant-numeric:tabular-nums;line-height:1}
+.val small{font-size:14px;font-weight:700}
+.detail{display:grid;grid-template-columns:var(--lab) 1fr;gap:14px;padding:4px 0 16px;border-bottom:1px solid var(--rule)}
+.detail[hidden]{display:none!important}
+.detail .ts{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-data);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding-top:3px}
+.detail .ts i{width:10px;height:10px;border-radius:2px;display:block}
+.detail p{margin:0 0 6px;font-size:16px;line-height:1.45;max-width:62ch}
+.detail .meta{font-family:var(--f-data);font-size:12px;color:var(--muted)}
+@media (max-width:620px){.detail{grid-template-columns:1fr;gap:6px}}
+
+.tip{position:absolute;pointer-events:none;width:310px;max-width:calc(100% - 16px);background:var(--surface);border:1px solid var(--rule);border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:14px 16px;opacity:0;transition:opacity .12s;z-index:5}
+.tip.on{opacity:1}
+.tip .tn{font-family:var(--f-display);font-stretch:80%;font-weight:800;font-size:22px;line-height:1.05;margin:0 0 6px}
+.tip .ts{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-data);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+.tip .ts i{width:10px;height:10px;border-radius:2px;display:block}
+.tip p{margin:0 0 6px;font-size:15px;line-height:1.42}
+.tip .meta{font-family:var(--f-data);font-size:11.5px;color:var(--muted)}
+@media (hover:none){.tip{display:none}}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;border-top:2px solid var(--ink);padding-top:22px}
+@media (max-width:760px){.grid{grid-template-columns:1fr;gap:26px}}
+h2{font-family:var(--f-display);font-stretch:75%;font-weight:800;font-size:26px;line-height:1;margin:0 0 12px;text-transform:uppercase}
+.grid p{margin:0 0 12px;font-size:16px;color:var(--muted);max-width:62ch}
+.grid p strong{color:var(--ink);font-weight:500}
+.big{font-family:var(--f-display);font-stretch:70%;font-weight:850;font-size:56px;line-height:1;display:block;color:var(--ink);margin-bottom:4px}
+.src{margin-top:36px;padding-top:16px;border-top:1px solid var(--rule);font-size:14px;color:var(--muted)}
+.src h3{font-family:var(--f-data);font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px;color:var(--ink)}
+.src ul{margin:0;padding:0;list-style:none;columns:2;column-gap:32px}
+@media (max-width:640px){.src ul{columns:1}}
+.src li{break-inside:avoid;margin-bottom:6px}
+.src a{color:var(--ink);text-decoration-color:var(--rule);text-underline-offset:3px}
+.src a:hover{text-decoration-color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.bar{animation:none}*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kicker"><span>Industria del cannabis</span><span>Ranking</span><span>Actualizado 2/11/2026</span></div>
+  <h1>Dónde se consume más <em>cannabis</em></h1>
+
+  <ul class="legend" aria-label="Estado legal">
+    <li class="lab">Estado legal</li>
+    <li><i style="background:var(--legal)"></i>Legal</li>
+    <li><i style="background:var(--parcial)"></i>Legal en algunos estados</li>
+    <li><i style="background:var(--despen)"></i>Despenalizado</li>
+    <li><i style="background:var(--ilegal)"></i>Ilegal</li>
+  </ul>
+  <p class="hint">% de la población que consumió cannabis en los últimos 12 meses. Pasá el cursor o tocá un país para ver la fuente.</p>
+
+  <div class="chart" id="chart">
+    <div class="axis" aria-hidden="true"><span></span><div class="ticks" id="ticks"></div><span></span></div>
+    <div id="rows"></div>
+    <div class="tip" id="tip"></div>
+  </div>
+
+
+  <div class="src">
+    <h3>Fuentes oficiales</h3>
+    <ul>
+      <li><a href="https://health-infobase.canada.ca/cannabis/index.html" target="_blank" rel="noopener">Health Canada, Canadian Cannabis Survey 2024</a></li>
+      <li><a href="https://www.samhsa.gov/data/sites/default/files/reports/rpt56287/2024-nsduh-annual-national/2024-nsduh-annual-national-html-071425-edited/2024-nsduh-annual-national.htm" target="_blank" rel="noopener">SAMHSA, NSDUH 2024 (EE.UU.)</a></li>
+      <li><a href="https://figure.nz/chart/p2dlytdfD0l5Lizx-YFo9Nt8L3sFxkv2m" target="_blank" rel="noopener">Ministerio de Salud de Nueva Zelanda, NZ Health Survey 2024/25 (vía Figure.NZ)</a></li>
+      <li><a href="https://prensamercosur.org/2024/12/07/el-uso-regular-de-cannabis-continua-en-aumento-en-espana/" target="_blank" rel="noopener">Ministerio de Sanidad de España, encuesta EDADES 2024</a></li>
+      <li><a href="https://www.montevideo.com.uy/Noticias/-Con-que-se-drogan-mas-los-uruguayos-Esto-dice-la-Junta-Nacional-de-Drogas-uc903715" target="_blank" rel="noopener">Junta Nacional de Drogas de Uruguay, VIII Encuesta Nacional 2024</a></li>
+      <li><a href="https://nadk.flinders.edu.au/kb/cannabis/use-patterns/has-the-proportion-of-cannabis-users-in-australia-changed-over-time" target="_blank" rel="noopener">AIHW, National Drug Strategy Household Survey 2022–23 (Australia)</a></li>
+      <li><a href="https://www.africacheck.org/infofinder/explore-facts/what-most-commonly-used-drug-nigeria" target="_blank" rel="noopener">UNODC y NBS, Drug Use in Nigeria (2018)</a></li>
+      <li><a href="https://www.statista.com/statistics/1649266/evolution-usage-cannabis-18-64-years-france" target="_blank" rel="noopener">OFDT y Santé publique France, Baromètre santé 2023</a></li>
+      <li><a href="https://www.argentina.gob.ar/sites/default/files/oad_2023_principales_resultados_en_relacion_con_el_consumo_de_marihuana.pdf" target="_blank" rel="noopener">Sedronar e INDEC, ENCoPraC 2022 (Argentina)</a></li>
+      <li><a href="https://psiconecta.org/wp-content/uploads/2025/12/ENPG-2024-Prensa.pdf" target="_blank" rel="noopener">SENDA, Estudio Nacional de Drogas en Población General 2024 (Chile)</a></li>
+      <li><a href="https://longreads.cbs.nl/the-netherlands-in-numbers-2024/how-many-people-use-cannabis" target="_blank" rel="noopener">CBS, Statistics Netherlands 2023</a></li>
+      <li><a href="https://drogy-info.cz/data/obj_files/35603/1297/P%C5%98%C3%8DLOHA%2001%20k%20TZ%202024-05-30_N%C3%A1rodn%C3%AD%20v%C3%BDzkum%202023%20v%20%C4%8D%C3%ADslech_fin.pdf" target="_blank" rel="noopener">Centro Nacional de Monitoreo de Drogas, Národní výzkum 2023 (Chequia)</a></li>
+          </ul>
+  </div>
+</div>
+
+<script>
+const LBL={legal:"Legal",parcial:"Legal en algunos estados",despen:"Ilegal pero despenalizado",ilegal:"Ilegal"};
+const D=[
+  {n:"Israel",v:27,s:"despen",old:1,src:"Encuesta nacional de consumo (IDR 2017)",y:"2017",a:"18 a 65 años",t:"El nivel más alto registrado por una encuesta nacional, frente a 8,8% en 2009. Es la última medición nacional publicada, por eso el dato es de 2017. Desde 2019 el consumo personal se sanciona con multa y tiene uno de los programas medicinales más amplios del mundo."},
+  {n:"Canadá",v:26,s:"legal",e:1,src:"Canadian Cannabis Survey, Health Canada",y:"2024",a:"16 años o más",t:"El mayor mercado legal federal del mundo. El consumo subió 4 puntos desde 2022 y entre los jóvenes de 16 a 19 años llega al 41%."},
+  {n:"Estados Unidos",v:22.3,s:"parcial",src:"NSDUH, SAMHSA",y:"2024",a:"12 años o más",t:"Equivale a 64,2 millones de personas. Entre los adultos de 18 a 25 años el consumo anual llega al 35%."},
+  {n:"Nueva Zelanda",v:14,s:"ilegal",e:1,src:"NZ Health Survey, Ministerio de Salud",y:"2024/25",a:"15 años o más",t:"Unos 610.000 adultos consumieron en el último año pese a la prohibición. El referéndum de 2020 rechazó legalizar por estrecho margen. Porcentaje estimado a partir de esa cifra."},
+  {n:"España",v:12.6,s:"despen",src:"Encuesta EDADES, Ministerio de Sanidad",y:"2024",a:"15 a 64 años",t:"Es la droga ilegal más consumida del país y el consumo habitual sigue en aumento. Los clubes sociales funcionan en una zona gris legal."},
+  {n:"Uruguay",v:12.3,s:"legal",src:"VIII Encuesta Nacional, Junta Nacional de Drogas",y:"2024",a:"15 a 65 años",t:"Primer país en legalizar (2013). El mercado regulado, con venta en farmacias, clubes y autocultivo, solo atiende a residentes registrados."},
+  {n:"Australia",v:12,s:"parcial",e:1,src:"National Drug Strategy Household Survey, AIHW",y:"2022–23",a:"14 años o más",t:"Legal solo en el Territorio de la Capital (ACT). La fuente publica el valor redondeado."},
+  {n:"Nigeria",v:10.8,s:"ilegal",src:"Drug Use in Nigeria, UNODC y Oficina Nacional de Estadística",y:"2018",a:"15 a 64 años",t:"Unos 10,6 millones de consumidores, el mayor volumen de África, con penas severas por tenencia. Es la última encuesta nacional disponible."},
+  {n:"Francia",v:10.8,s:"ilegal",src:"Baromètre santé, OFDT y Santé publique France",y:"2023",a:"18 a 64 años",t:"Uno de los marcos más punitivos de Europa (multa fija de 200 euros por consumo) y, a la vez, uno de los niveles de consumo más altos del continente."},
+  {n:"Argentina",v:10.3,s:"despen",src:"ENCoPraC, Sedronar e INDEC",y:"2022",a:"16 a 75 años",t:"Uno de cada diez argentinos de grandes ciudades consumió en el último año, y el 21% lo probó alguna vez. El consumo personal está despenalizado por el fallo Arriola."},
+  {n:"Chile",v:10.1,s:"despen",src:"Estudio Nacional de Drogas en Población General, SENDA",y:"2024",a:"12 a 65 años",t:"El nivel más bajo en una década: bajó desde 10,9% en 2022."},
+  {n:"Países Bajos",v:8,s:"despen",e:1,src:"CBS, Statistics Netherlands",y:"2023",a:"12 años o más",t:"Pese a los coffeeshops, consume menos que Francia o España. Entre los 20 y 29 años, la cifra sube a 21,5%. La fuente indica casi 8%."},
+  {n:"Chequia",v:7.4,s:"legal",src:"Národní výzkum, Centro Nacional de Monitoreo de Drogas",y:"2023",a:"adultos",t:"Medición previa a la ley que desde enero de 2026 permite el autocultivo de 3 plantas y la tenencia de 100 g en casa."}
+];
+const MAX=30;
+const fmt=v=>String(Math.round(v));
+D.forEach(d=>{d.e=0;});
+document.getElementById("ticks").innerHTML=[0,5,10,15,20,25,30].map(t=>`<span class="${t%10?"odd":""}" style="left:${t/MAX*100}%">${t}%</span>`).join("");
+const rows=document.getElementById("rows");
+rows.innerHTML=D.map((d,i)=>`
+  <button class="row" type="button" id="r${i}" aria-expanded="false" aria-controls="d${i}">
+    <span class="name"><span class="pos">${i+1}</span><span class="nm">${d.n}<span class="yr${d.old?" old":""}">${d.old?"Dato ":""}${d.y}</span></span></span>
+    <span class="track"><span class="bar${d.e?" est":""}" style="width:${d.v/MAX*100}%;background:var(--${d.s});animation-delay:${i*45}ms"></span></span>
+    <span class="val">${d.e?"≈":""}${fmt(d.v)}<small>%</small></span>
+  </button>
+  <div class="detail" id="d${i}" hidden>
+    <span class="ts"><i style="background:var(--${d.s})"></i>${LBL[d.s]}</span>
+    <div><p>${d.t}</p><div class="meta">${d.src} · ${d.y} · ${d.a}</div></div>
+  </div>`).join("");
+
+rows.addEventListener("click",e=>{
+  const b=e.target.closest(".row"); if(!b) return;
+  const det=document.getElementById(b.getAttribute("aria-controls"));
+  const open=b.getAttribute("aria-expanded")==="true";
+  b.setAttribute("aria-expanded",String(!open)); det.hidden=open;
+  tip.classList.remove("on");
+});
+
+const tip=document.getElementById("tip"), chart=document.getElementById("chart");
+rows.addEventListener("pointermove",e=>{
+  if(e.pointerType==="touch") return;
+  const b=e.target.closest(".row"); if(!b||b.getAttribute("aria-expanded")==="true"){tip.classList.remove("on");return;}
+  const d=D[+b.id.slice(1)];
+  tip.innerHTML=`<div class="tn">${d.n} · ${d.e?"≈":""}${fmt(d.v)}%</div><div class="ts"><i style="background:var(--${d.s})"></i>${LBL[d.s]}</div><p>${d.t}</p><div class="meta">${d.src} · ${d.y} · ${d.a}</div>`;
+  tip.classList.add("on");
+  const r=chart.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight;
+  let x=e.clientX-r.left+16, y=e.clientY-r.top+16;
+  if(x+tw>r.width-4) x=e.clientX-r.left-tw-16; if(x<4) x=4;
+  if(y+th>r.height) y=Math.max(4,e.clientY-r.top-th-12);
+  tip.style.left=x+"px"; tip.style.top=y+"px";
+});
+rows.addEventListener("pointerleave",()=>tip.classList.remove("on"));
+</script>
+
+</body></html>
