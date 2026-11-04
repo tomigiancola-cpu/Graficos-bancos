@@ -1,0 +1,257 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Argentina envejece</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,650&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: columna editorial única, pestañas de gráfico + ficha de datos clave + fuentes al pie */
+:root{
+  --bg:#fbfbf8; --surface:#ffffff; --fg:#1c2128; --muted:#5d6672; --rule:#dfe2e4;
+  --arg:#2f7fb8; --world:#9a8f7e; --death:#a33a2b; --proj:#2f7fb8;
+  --chip:#eef3f7;
+  --display:"Newsreader", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14181d; --surface:#1b2027; --fg:#e8eaec; --muted:#9aa3ad; --rule:#2c333b;
+  --arg:#6db3e6; --world:#c2b59f; --death:#e0705e; --proj:#6db3e6; --chip:#1f2a35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14181d; --surface:#1b2027; --fg:#e8eaec; --muted:#9aa3ad; --rule:#2c333b;
+  --arg:#6db3e6; --world:#c2b59f; --death:#e0705e; --proj:#6db3e6; --chip:#1f2a35; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 40px;display:flex;flex-direction:column;gap:22px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--arg)}
+h1{font-family:var(--display);font-weight:650;font-size:clamp(28px,5vw,40px);line-height:1.1;margin:6px 0 10px;text-wrap:balance}
+.dek{color:var(--muted);max-width:62ch;margin:0}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--fg);border-bottom:1px solid var(--rule)}
+.fact{padding:14px 14px 14px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.fact+.fact{padding-left:14px;border-left:1px solid var(--rule)}
+.fact b{font-family:var(--mono);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums}
+.fact span{font-size:12.5px;color:var(--muted);line-height:1.35}
+.fact b.neg{color:var(--death)} .fact b.pos{color:var(--arg)}
+@media (max-width:640px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact:nth-child(3){padding-left:0;border-left:0}.fact:nth-child(n+3){border-top:1px solid var(--rule)}}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:500 13.5px var(--body);color:var(--muted);background:transparent;border:1px solid var(--rule);
+  border-radius:999px;padding:7px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tabs button:focus-visible,.toggle button:focus-visible{outline:2px solid var(--arg);outline-offset:2px}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:18px 18px 14px;display:flex;flex-direction:column;gap:10px}
+.panel h2{font-family:var(--display);font-weight:650;font-size:22px;line-height:1.2;margin:0;text-wrap:balance}
+.panel p.sub{margin:0;color:var(--muted);font-size:13.5px;max-width:68ch}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.dash{background:repeating-linear-gradient(90deg,currentColor 0 4px,transparent 4px 7px)!important;height:2px}
+.toggle{display:inline-flex;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.toggle button{font:500 12px var(--mono);background:transparent;color:var(--muted);border:0;padding:6px 10px;cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--chip);color:var(--fg)}
+.chart{position:relative;height:360px;min-width:0}
+@media (max-width:520px){.chart{height:300px}}
+.note{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--rule);padding-top:8px;margin:0}
+footer{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+footer h3{font:500 11.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0;color:var(--fg)}
+footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+footer a{color:var(--arg)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">Demografía · Argentina y el mundo</div>
+    <h1>Menos nacimientos, más muertes: la Argentina llega al techo de su población</h1>
+    <p class="dek">En diez años los nacimientos cayeron casi a la mitad y en 2024 la diferencia con las defunciones fue la más chica de la serie. El mundo seguirá creciendo hasta los años 2080; la Argentina tocaría su máximo hacia 2050 según la ONU, y antes si la fecundidad sigue en los niveles actuales.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Elegir gráfico">
+    <button role="tab" id="t-pop" aria-selected="true" data-p="pop">Población</button>
+    <button role="tab" id="t-nac" aria-selected="false" data-p="nac">Nacimientos</button>
+    <button role="tab" id="t-def" aria-selected="false" data-p="def">Defunciones</button>
+    <button role="tab" id="t-gap" aria-selected="false" data-p="gap">Nacimientos vs. muertes</button>
+  </nav>
+
+  <!-- Población -->
+  <section class="panel" data-panel="pop" role="tabpanel" aria-labelledby="t-pop">
+    <h2>La Argentina crece más lento que el mundo y empezaría a achicarse antes</h2>
+    <p class="sub">Población 1960–2100. Desde 2025, proyección de la ONU (variante media, World Population Prospects 2024).</p>
+    <div class="row">
+      <div class="legend">
+        <span><i style="background:var(--arg)"></i>Argentina</span>
+        <span><i style="background:var(--world)"></i>Mundo</span>
+        <span style="color:var(--muted)"><i class="dash"></i>Proyección</span>
+      </div>
+      <div class="toggle" role="group" aria-label="Escala">
+        <button id="m-idx" aria-pressed="true" data-m="idx">Índice 1960=100</button>
+        <button id="m-abs" aria-pressed="false" data-m="abs">Millones</button>
+      </div>
+    </div>
+    <div class="chart"><canvas id="cPop" aria-label="Población de Argentina y el mundo"></canvas></div>
+    <p class="note">Con fecundidad constante en 1,16 hijos por mujer, la Dirección Nacional de Políticas de la Seguridad Social estima que la población argentina empezaría a caer a mediados de la década de 2030, sin contar migraciones.</p>
+  </section>
+
+  <!-- Nacimientos -->
+  <section class="panel" data-panel="nac" role="tabpanel" aria-labelledby="t-nac" hidden>
+    <h2>Los nacimientos cayeron 47% desde el pico de 2014</h2>
+    <p class="sub">Nacidos vivos registrados por año, total país. 2024 es el nivel más bajo desde fines de los años cuarenta.</p>
+    <div class="chart"><canvas id="cNac" aria-label="Nacimientos por año en Argentina"></canvas></div>
+    <p class="note">La baja más fuerte fue en 2020 (−14,7% interanual) y siguió en 2023 (−6,9%) y 2024 (−10,4%). La fecundidad adolescente cayó cerca de 60% en la década.</p>
+  </section>
+
+  <!-- Defunciones -->
+  <section class="panel" data-panel="def" role="tabpanel" aria-labelledby="t-def" hidden>
+    <h2>Las muertes rondan 350.000 a 375.000 por año y tienden a subir</h2>
+    <p class="sub">Defunciones registradas por año, total país. El pico de 2020–2021 corresponde a la pandemia de covid-19.</p>
+    <div class="chart"><canvas id="cDef" aria-label="Defunciones por año en Argentina"></canvas></div>
+    <p class="note">Antes de 2020 el promedio era de unas 340.000 muertes anuales. El envejecimiento empuja la cifra hacia arriba: más personas llegan a edades avanzadas.</p>
+  </section>
+
+  <!-- Brecha -->
+  <section class="panel" data-panel="gap" role="tabpanel" aria-labelledby="t-gap" hidden>
+    <h2>La brecha entre nacimientos y muertes casi desapareció</h2>
+    <p class="sub">Nacimientos, defunciones y su diferencia (crecimiento vegetativo), 2008–2024.</p>
+    <div class="legend">
+      <span><i style="background:var(--arg)"></i>Nacimientos</span>
+      <span><i style="background:var(--death)"></i>Defunciones</span>
+      <span><i style="background:var(--world);height:10px;opacity:.5"></i>Diferencia</span>
+    </div>
+    <div class="chart"><canvas id="cGap" aria-label="Nacimientos y defunciones por año"></canvas></div>
+    <p class="note">Entre 1975 y 2015 la diferencia promedió unas 420.000 personas por año. En 2024 fue de 36.730. En la Ciudad y en la provincia de Buenos Aires ya mueren más personas de las que nacen.</p>
+  </section>
+
+  <footer>
+    <h3>Fuentes</h3>
+    <ul>
+      <li>Nacimientos y defunciones: DEIS, Ministerio de Salud de la Nación, Estadísticas Vitales (2008–2024; 2023 y 2024 de las síntesis más recientes).</li>
+      <li>Población: Banco Mundial (1960–2024) y ONU, <a href="https://population.un.org/wpp/" target="_blank" rel="noopener">World Population Prospects 2024</a>, variante media (2025–2100).</li>
+      <li>Escenarios y estructura por edad: DNPSS, <a href="https://argentina.gob.ar/sites/default/files/2024/12/el_declive_demografico_en_argentina_-_v16-12-24_vf.pdf" target="_blank" rel="noopener">El declive demográfico en Argentina</a> (2024). Fecundidad 2024: UNFPA Argentina.</li>
+    </ul>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function(){
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = new Intl.NumberFormat('es-AR');
+  const fmt1 = new Intl.NumberFormat('es-AR',{maximumFractionDigits:1, minimumFractionDigits:1});
+
+  // Población (millones). Hist. Banco Mundial; desde 2025 ONU WPP 2024 variante media
+  const yrs   = [1960,1970,1980,1990,2000,2010,2020,2024,2030,2050,2085,2100];
+  const arg   = [20.39,23.88,28.11,32.62,37.07,41.10,45.19,45.70,46.59,48.39,null,38.47];
+  const world = [3030,3700,4440,5330,6170,6990,7890,8160,8550,9660,10300,10180]; // millones
+  const LAST_HIST = 2024;
+
+  const years = Array.from({length:17},(_,i)=>2008+i);
+  const nac = [746460,745336,756176,758042,738318,754603,777012,770040,728035,704609,685394,625441,533299,529794,495295,460902,413135];
+  const def = [302133,304525,318602,319059,319539,326197,325539,333407,345876,336823,336111,341728,376219,436799,397115,353428,376405];
+  const gap = nac.map((n,i)=>n-def[i]);
+
+  const charts = {};
+  const base = () => ({
+    responsive:true, maintainAspectRatio:false, animation:{duration: matchMedia('(prefers-reduced-motion: reduce)').matches?0:500},
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false}, tooltip:{backgroundColor:css('--fg'), titleColor:css('--bg'), bodyColor:css('--bg'),
+      titleFont:{family:'IBM Plex Mono'}, bodyFont:{family:'Public Sans'}, padding:10, cornerRadius:4}},
+    scales:{
+      x:{grid:{display:false}, border:{color:css('--rule')}, ticks:{color:css('--muted'), font:{family:'IBM Plex Mono', size:11}}},
+      y:{grid:{color:css('--rule')}, border:{display:false}, ticks:{color:css('--muted'), font:{family:'IBM Plex Mono', size:11}}}
+    }
+  });
+
+  let popMode='idx';
+  function popData(){
+    const a = popMode==='idx' ? arg.map(v=>v==null?null:v/arg[0]*100) : arg;
+    const w = popMode==='idx' ? world.map(v=>v/world[0]*100) : world.map(v=>v/1000);
+    const pts = (arr)=>yrs.map((x,i)=>({x, y:arr[i]}));
+    return {a:pts(a), w:pts(w)};
+  }
+  function buildPop(){
+    const d = popData(), o = base();
+    const dashAfter = ctx => ctx.p0.parsed.x >= LAST_HIST ? [5,4] : undefined;
+    o.scales.x = {...o.scales.x, type:'linear', min:1960, max:2100, ticks:{...o.scales.x.ticks, stepSize:20, callback:v=>v}};
+    const dual = popMode==='abs';
+    o.scales.y.ticks.callback = v => dual ? fmt.format(v)+' M' : fmt.format(v);
+    o.scales.y.title = {display:true, text: dual ? 'Argentina (millones)' : 'Índice, 1960 = 100', color:css('--muted'), font:{family:'Public Sans', size:11}};
+    if(dual){
+      o.scales.y2 = {position:'right', grid:{display:false}, border:{display:false},
+        ticks:{color:css('--world'), font:{family:'IBM Plex Mono', size:11}, callback:v=>fmt1.format(v)+' mil M'},
+        title:{display:true, text:'Mundo (miles de millones)', color:css('--world'), font:{family:'Public Sans', size:11}}};
+    }
+    o.plugins.tooltip.callbacks = {
+      title: it => it[0].parsed.x + (it[0].parsed.x>LAST_HIST?' (proyección)':''),
+      label: it => {
+        const n = it.dataset.label, y = it.parsed.y;
+        if(!dual) return ` ${n}: ${fmt1.format(y)}`;
+        return n==='Mundo' ? ` Mundo: ${fmt1.format(y)} mil millones` : ` Argentina: ${fmt1.format(y)} millones`;
+      }};
+    o.parsing = false;
+    return new Chart(document.getElementById('cPop'), {type:'line', data:{datasets:[
+      {label:'Argentina', data:d.a, borderColor:css('--arg'), backgroundColor:css('--arg'), borderWidth:2.5, pointRadius:3, tension:.3, spanGaps:true, segment:{borderDash:dashAfter}, yAxisID:'y'},
+      {label:'Mundo', data:d.w, borderColor:css('--world'), backgroundColor:css('--world'), borderWidth:2.5, pointRadius:3, tension:.3, segment:{borderDash:dashAfter}, yAxisID: dual?'y2':'y'}
+    ]}, options:o});
+  }
+
+  function buildNac(){
+    const o = base();
+    o.scales.y.ticks.callback = v => fmt.format(v/1000)+' mil';
+    o.scales.y.beginAtZero = true;
+    o.plugins.tooltip.callbacks = {label: it => ` ${fmt.format(it.parsed.y)} nacimientos`};
+    const c = css('--arg');
+    return new Chart(document.getElementById('cNac'), {type:'bar', data:{labels:years, datasets:[
+      {data:nac, backgroundColor: years.map(y=> y===2014||y===2024 ? c : c+'88'), borderRadius:2}
+    ]}, options:o});
+  }
+
+  function buildDef(){
+    const o = base();
+    o.scales.y.ticks.callback = v => fmt.format(v/1000)+' mil';
+    o.scales.y.beginAtZero = true;
+    o.plugins.tooltip.callbacks = {label: it => ` ${fmt.format(it.parsed.y)} defunciones` + (it.label==='2020'||it.label==='2021'?' (pandemia)':'')};
+    const c = css('--death');
+    return new Chart(document.getElementById('cDef'), {type:'bar', data:{labels:years, datasets:[
+      {data:def, backgroundColor: years.map(y=> y===2020||y===2021 ? c : c+'88'), borderRadius:2}
+    ]}, options:o});
+  }
+
+  function buildGap(){
+    const o = base();
+    o.scales.y.ticks.callback = v => fmt.format(v/1000)+' mil';
+    o.scales.y.beginAtZero = true;
+    o.plugins.tooltip.callbacks = {label: it => ` ${it.dataset.label}: ${fmt.format(it.parsed.y)}`};
+    return new Chart(document.getElementById('cGap'), {data:{labels:years, datasets:[
+      {type:'line', label:'Nacimientos', data:nac, borderColor:css('--arg'), backgroundColor:css('--arg'), borderWidth:2.5, pointRadius:2.5, tension:.25, order:1},
+      {type:'line', label:'Defunciones', data:def, borderColor:css('--death'), backgroundColor:css('--death'), borderWidth:2.5, pointRadius:2.5, tension:.25, order:2},
+      {type:'bar', label:'Diferencia', data:gap, backgroundColor:css('--world')+'80', borderRadius:2, order:3}
+    ]}, options:o});
+  }
+
+  const builders = {pop:buildPop, nac:buildNac, def:buildDef, gap:buildGap};
+  function render(key){ if(charts[key]) charts[key].destroy(); charts[key] = builders[key](); }
+
+  function show(key){
+    document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.p===key));
+    document.querySelectorAll('[data-panel]').forEach(p=>p.hidden = p.dataset.panel!==key);
+    render(key);
+    try{ localStorage.setItem('tab', key); }catch(e){}
+  }
+  document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.p)));
+  document.querySelectorAll('.toggle button').forEach(b=>b.addEventListener('click',()=>{
+    popMode = b.dataset.m;
+    document.querySelectorAll('.toggle button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+    render('pop');
+  }));
+
+  // Re-render on theme change so canvas colors follow tokens
+  const rerenderVisible = ()=>{ const k = document.querySelector('.tabs [aria-selected="true"]').dataset.p; render(k); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rerenderVisible);
+  new MutationObserver(rerenderVisible).observe(document.documentElement,{attributes:true, attributeFilter:['data-theme']});
+
+  if(!window.Chart){ document.querySelectorAll('.chart').forEach(c=>c.textContent='No se pudo cargar la librería de gráficos.'); return; }
+  let start='pop'; try{ start = localStorage.getItem('tab') || 'pop'; }catch(e){}
+  if(!builders[start]) start='pop';
+  show(start);
+})();
+</script>
+
+</body></html>
