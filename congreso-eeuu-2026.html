@@ -1,0 +1,152 @@
+<title>Congreso de EE.UU. 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Archivo+Narrow:wght@400;500;600&display=swap">
+<style>
+/* Layout: title, before/after switch, then one band per chamber: hemicycle + party tallies, changes below. */
+:root{
+  --bg:#f6f7f9; --ink:#10161f; --muted:#5b6573; --rule:#d9dee5; --panel:#ffffff;
+  --dem:#1f5fbf; --ind:#7fa7e0; --rep:#c8312f; --pend:#c3c9d2; --vac:#e6e9ee;
+  --f-display:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-data:"Archivo Narrow","Arial Narrow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141b; --ink:#e9edf2; --muted:#9aa5b3; --rule:#2a333f; --panel:#151c25;
+  --dem:#4f8ff0; --ind:#9cc0f5; --rep:#f0605c; --pend:#4a5462; --vac:#232b36; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --ink:#e9edf2; --muted:#9aa5b3; --rule:#2a333f; --panel:#151c25;
+  --dem:#4f8ff0; --ind:#9cc0f5; --rep:#f0605c; --pend:#4a5462; --vac:#232b36; color-scheme:dark}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-display);margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+h1{font:800 clamp(24px,4.2vw,36px)/1.1 var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.switch{display:inline-flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden;align-self:flex-start;background:var(--panel)}
+.switch button{font:500 14px/1 var(--f-data);padding:9px 14px;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.switch button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.switch button:focus-visible{outline:2px solid var(--dem);outline-offset:-2px}
+.chamber{border-top:2px solid var(--ink);padding-top:14px;display:flex;flex-direction:column;gap:14px}
+.chead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
+h2{font:700 21px/1.2 var(--f-display);margin:0}
+.majority{font:500 13px/1.2 var(--f-data);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.body{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:center}
+.hemi{width:100%;height:auto;display:block}
+.hemi circle{transition:fill .5s ease, stroke-width .3s ease}
+.hemi text{font-family:var(--f-data);fill:var(--muted);font-size:10px}
+.tally{display:flex;flex-direction:column;gap:0}
+.row{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--rule)}
+.row:first-child{border-top:1px solid var(--rule)}
+.sw{width:12px;height:12px;border-radius:50%;align-self:center}
+.pname{font:500 15px/1.2 var(--f-display);min-width:0}
+.pname small{display:block;font:400 12px/1.3 var(--f-data);color:var(--muted)}
+.seats{font:600 26px/1 var(--f-data);font-variant-numeric:tabular-nums;text-align:right}
+.delta{font:600 13px/1 var(--f-data);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right;padding:4px 6px;border-radius:3px}
+.up{color:var(--dem)} .down{color:var(--rep)} .flat{color:var(--muted)}
+.changes{display:flex;flex-direction:column;gap:8px}
+.changes h3{font:600 12px/1 var(--f-data);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px/1 var(--f-data);padding:6px 9px;border-radius:3px;border:1px solid var(--rule);background:var(--panel);display:inline-flex;gap:6px;align-items:center}
+.chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chip .arrow{color:var(--muted)}
+.note{font:400 14px/1.5 var(--f-data);color:var(--muted);margin:0;max-width:70ch}
+.note b{color:var(--ink);font-weight:600}
+.foot{font:400 13px/1.5 var(--f-data);color:var(--muted);border-top:1px solid var(--rule);padding-top:10px}
+@media (max-width:640px){.body{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.hemi circle{transition:none}}
+</style>
+
+<div class="wrap">
+  <h1>Los demócratas toman el control de ambas cámaras del Congreso</h1>
+
+  <div class="switch" role="group" aria-label="Composición">
+    <button type="button" id="bBefore" aria-pressed="false">Antes de la elección</button>
+    <button type="button" id="bAfter" aria-pressed="true">Después de la elección</button>
+  </div>
+
+  <section class="chamber" id="senate">
+    <div class="chead"><h2>Senado</h2><span class="majority">100 bancas · mayoría: 51</span></div>
+    <div class="body">
+      <svg class="hemi" id="hemiS" viewBox="0 0 400 258" role="img" aria-label="Hemiciclo del Senado"></svg>
+      <div class="tally" id="tallyS"></div>
+    </div>
+  </section>
+
+  <section class="chamber" id="house">
+    <div class="chead"><h2>Cámara de Representantes</h2><span class="majority">435 bancas · mayoría: 218</span></div>
+    <div class="body">
+      <svg class="hemi" id="hemiH" viewBox="0 0 400 258" role="img" aria-label="Hemiciclo de la Cámara de Representantes"></svg>
+      <div class="tally" id="tallyH"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg";
+const LABEL={D:'Demócratas',I:'Independientes',P:'Sin definir',V:'Vacantes',R:'Republicanos'};
+const SUB={I:{S:'Votan con los demócratas',H:'Kevin Kiley (California)'}};
+const COLOR={D:'var(--dem)',I:'var(--ind)',P:'var(--pend)',V:'var(--vac)',R:'var(--rep)'};
+const ORDER=['I','D','P','V','R'];
+const DATA={
+  S:{n:100,rows:5,maj:51,before:{D:45,I:2,R:53},after:{D:52,I:2,P:2,R:44}},
+  H:{n:435,rows:10,maj:218,before:{D:214,I:1,V:2,R:218},after:{D:253,P:25,R:157}}
+};
+const FLIPS=['Carolina del Norte','Carolina del Sur','Iowa','Kansas','Maine','Ohio','Texas'];
+
+function seq(comp){const out=[];for(const k of ORDER)for(let i=0;i<(comp[k]||0);i++)out.push(k);return out}
+
+function seats(n,rows){
+  const R=190,r0=78,cx=200,cy=200;const radii=[];for(let i=0;i<rows;i++)radii.push(r0+(R-r0)*i/(rows-1));
+  const tot=radii.reduce((a,b)=>a+b,0);let counts=radii.map(r=>Math.round(n*r/tot));
+  let diff=n-counts.reduce((a,b)=>a+b,0);counts[rows-1]+=diff;
+  const pts=[];radii.forEach((r,i)=>{const c=counts[i];for(let j=0;j<c;j++){const a=Math.PI*(1-j/(c-1));pts.push({a,r,x:cx+r*Math.cos(a),y:cy-r*Math.sin(a)})}});
+  pts.sort((p,q)=>q.a-p.a||p.r-q.r);
+  const gap=(R-r0)/(rows-1);const arc=Math.PI*r0/(counts[0]-1);
+  return {pts,dot:Math.min(gap,arc)*0.42}
+}
+
+const built={};
+function build(key){
+  const d=DATA[key],svg=document.getElementById('hemi'+key);const {pts,dot}=seats(d.n,d.rows);
+  const circles=pts.map(p=>{const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x.toFixed(1));c.setAttribute('cy',p.y.toFixed(1));
+    c.setAttribute('r',dot.toFixed(2));c.setAttribute('stroke','var(--ink)');c.setAttribute('stroke-width','0');
+    const t=document.createElementNS(NS,'title');c.appendChild(t);svg.appendChild(c);return c});
+  const ml=document.createElementNS(NS,'line');ml.setAttribute('x1',200);ml.setAttribute('x2',200);ml.setAttribute('y1',2);ml.setAttribute('y2',118);
+  ml.setAttribute('stroke','var(--muted)');ml.setAttribute('stroke-dasharray','2 3');svg.insertBefore(ml,svg.firstChild);
+  const big=document.createElementNS(NS,'text');big.setAttribute('x',200);big.setAttribute('y',238);big.setAttribute('text-anchor','middle');
+  big.setAttribute('style','font-size:30px;font-weight:600;fill:var(--ink)');svg.appendChild(big);
+  const lab=document.createElementNS(NS,'text');lab.setAttribute('x',200);lab.setAttribute('y',254);lab.setAttribute('text-anchor','middle');lab.setAttribute('style','font-size:11px');svg.appendChild(lab);
+  built[key]={circles,big,lab,before:seq(d.before),after:seq(d.after)};
+}
+
+function sign(v){return v>0?'+'+v:v<0?'−'+Math.abs(v):'='}
+function render(mode){
+  for(const key of ['S','H']){
+    const d=DATA[key],b=built[key];const cur=mode==='after'?b.after:b.before;
+    b.circles.forEach((c,i)=>{const k=cur[i];c.setAttribute('fill',COLOR[k]);
+      c.setAttribute('stroke-width',mode==='after'&&b.before[i]!==k?(key==='S'?'1.6':'0.9'):'0');
+      c.firstChild.textContent=LABEL[k]});
+    const comp=mode==='after'?d.after:d.before;
+    const demSide=(comp.D||0)+(key==='S'?(comp.I||0):0);
+    b.big.textContent=demSide+' – '+comp.R;
+    b.lab.textContent=key==='S'?'demócratas e independientes – republicanos':'demócratas – republicanos';
+    const keys=ORDER.filter(k=>(d.before[k]||0)+(d.after[k]||0)>0);
+    document.getElementById('tally'+key).innerHTML=keys.map(k=>{
+      const v=comp[k]||0,dv=(d.after[k]||0)-(d.before[k]||0);
+      const dl=mode==='after'&&(k==='D'||k==='R'||k==='I')?`<span class="delta ${dv>0?'up':dv<0?'down':'flat'}">${sign(dv)}</span>`:'<span class="delta"></span>';
+      const sub=SUB[k]&&SUB[k][key]?`<small>${SUB[k][key]}</small>`:'';
+      return `<div class="row"><span class="sw" style="background:${COLOR[k]}"></span><span class="pname">${LABEL[k]}${sub}</span><span class="seats">${v}</span>${dl}</div>`}).join('');
+  }
+  document.getElementById('bBefore').setAttribute('aria-pressed',mode==='before');
+  document.getElementById('bAfter').setAttribute('aria-pressed',mode==='after');
+}
+build('S');build('H');
+if(document.getElementById('flipsS'))document.getElementById('flipsS').innerHTML=FLIPS.map(s=>`<span class="chip"><i style="background:var(--rep)"></i>${s}<span class="arrow">→</span><i style="background:var(--dem)"></i></span>`).join('');
+document.getElementById('bBefore').onclick=()=>render('before');
+document.getElementById('bAfter').onclick=()=>render('after');
+render('after');
+})();
+</script>
